@@ -78,7 +78,10 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
     {
         fprintf (stderr, "failed to malloc %Zu bytes to memory buffer\n", remote_args->len);
         rc = 1;
-        return rc;
+        strcpy(msg, "Finish Server");
+  	p = msg; 
+    	printf("Returning...\n");
+        return (&p);
     }
     memset (res.buf, 0, remote_args->len);
     if (post_send (&res, IBV_WR_RDMA_READ))
@@ -98,13 +101,12 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
     else {
 	printf("Buffer: %s", res.buf);
     }
-//
-//
-//	strcpy(msg, "Hello world");
-//	p = msg;
-//	printf("Returning...\n");
 
-    return rc;
+    strcpy(msg, "Finish Server");
+    p = msg; 
+    printf("Returning...\n");
+
+    return (&p);
 }
 
 char **rdmac_1_svc(void *a, struct svc_req *req) {
