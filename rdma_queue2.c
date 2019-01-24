@@ -96,6 +96,7 @@ struct resources
     struct ibv_mr *mr;            /* MR handle for buf */
     char *buf;                    /* memory buffer pointer, used for RDMA and send
                                      ops */
+    uint64_t remote_buf_len;	  /* Remote Buffer length */
     int sock;                     /* TCP socket file descriptor */
 };
 struct config_t config = {
@@ -347,7 +348,7 @@ post_send (struct resources *res, int opcode)
     /* prepare the scatter/gather entry */
     memset (&sge, 0, sizeof (sge));
     sge.addr = (uintptr_t) res->buf;
-    sge.length = MSG_SIZE;
+    sge.length = res->;
     sge.lkey = res->mr->lkey;
     /* prepare the send work request */
     memset (&sr, 0, sizeof (sr));
@@ -474,6 +475,7 @@ resources_create (struct resources *res)
     struct ibv_device **dev_list = NULL;
     struct ibv_qp_init_attr qp_init_attr;
     struct ibv_device *ib_dev = NULL;
+    res->remote_buf_len=0;
     size_t size;
     int i;
     int mr_flags = 0;

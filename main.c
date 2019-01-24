@@ -1324,6 +1324,9 @@ main (int argc, char *argv[]) {
 
 //	Call RPC stating the remote server qp number
 	rpc_args.qp_num = res.remote_props.qp_num;
+//	rpc_args.src_add=res.buf;
+	strcpy(res.buf,"Matan Test Client Buffer data");
+
 	printf("Remote queue pair number=0x%x\n", rpc_args.qp_num);
 
 	printf("Getting ready to call hello world\n");

@@ -61,6 +61,7 @@ struct resources res;
 char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
 	static char msg[256];
 	static char *p;
+	rc = 0;
 	rpc_args_t* remote_args = (rpc_args_t*)a;
 
 	printf("getting ready to return value\n");
@@ -68,7 +69,18 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
 
 	printf("> > > > > Start post_send");
 	res->remote_props= remote_args->src_addr;
-	rc = 0;
+
+	/*
+	 * Allocate buffer by size of remote len
+	 */
+    res->buf = (char *) malloc (remote_args->len);
+    if (!res->buf)
+    {
+        fprintf (stderr, "failed to malloc %Zu bytes to memory buffer\n", res->remote_buf_len);
+        rc = 1;
+        return rc
+    }
+    memset (res->buf, 0, remote_args->len);
     if (post_send (&res, IBV_WR_RDMA_READ))
     {
         fprintf (stderr, "failed to post SR 2\n");
