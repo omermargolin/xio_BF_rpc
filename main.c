@@ -2,7 +2,7 @@
 #include <rpc/rpc.h>
 #include "hw.h"
 
-/* 
+/*
    Simple "hello world" program that demonstrates an rpc call.
 */
 
@@ -47,6 +47,7 @@
 #define RDMAMSGW "RDMA write operation"
 #define MSG_SIZE (strlen(MSG) + 1)
 #if __BYTE_ORDER == __LITTLE_ENDIAN
+int QP_id;
 static inline uint64_t
 htonll (uint64_t x)
 {
@@ -1170,8 +1171,9 @@ void *rdma_connect_to_server_thread(void *cl_t)
 //		clnt_perror(cl, argv[1]);
 		exit(1);
 	}
-	printf("Returned string=%s\n", *p);
-
+	printf("Returned string=%d\n", *p);
+	QP_id = strtol(*p, NULL, 10);
+	printf("Returned int=%d\n", QP_id);
 }
 
 
@@ -1323,8 +1325,9 @@ main (int argc, char *argv[]) {
 	}
 
 //	Call RPC stating the remote server qp number
-	rpc_args.qp_num = res.remote_props.qp_num;
-	printf("Remote queue pair number=0x%x\n", rpc_args.qp_num);
+//	rpc_args.qp_num = res.remote_props.qp_num;
+	rpc_args.qp_num = QP_id;
+	printf("Remote queue pair ID=%d\n", rpc_args.qp_num);
 
 	printf("Getting ready to call hello world\n");
 	p = hw_1(&rpc_args, cl);

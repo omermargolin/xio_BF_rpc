@@ -2,6 +2,8 @@
 #include "hw.h"
 #include <infiniband/verbs.h>
 
+#define MAX_RESOURCE_HANDLES 20
+
 struct cm_con_data_t
 {
     uint64_t addr;                /* Buffer address */
@@ -36,13 +38,10 @@ struct resources
                                      ops */
     int sock;                     /* TCP socket file descriptor */
 };
+struct resources resource_handles[MAX_RESOURCE_HANDLES];
+int last_resource_handle = 0;
 
-static void
-resources_init (struct resources *res)
-{
-    memset (res, 0, sizeof *res);
-    res->sock = -1;
-}
+
 
 //./rdma_server -g 0 -d mlx5_0
 struct config_t in_config = {
@@ -62,13 +61,13 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
 	static char msg[256];
 	static char *p;
 	rpc_args_t* remote_args = (rpc_args_t*)a;
-
+	printf ("Entering hw_1_svc\n");
 	printf("getting ready to return value\n");
-	printf("given queue number=0x%x\n", remote_args->qp_num);
+	printf("given queue number=%d\n", remote_args->qp_num);
 	strcpy(msg, "Hello world");
 	p = msg;
 	printf("Returning...\n");
-
+	printf ("Exiting hw_1_svc\n");
 	return(&p);
 }
 
@@ -76,15 +75,16 @@ char **rdmac_1_svc(void *a, struct svc_req *req) {
 	static char msg[256];
 	static char *p;
 //	resources_init (&res);
-	printf("getting ready to set rdma connection\n");
-	create_res_handle(&res, in_config);
-	test_param += 1;
+	printf("Entering: rmdac_1_svc\n");
+	last_resource_handle++;  // TODO: Add check that we aren't blowing past the end of the array
+	printf("getting ready to set rdma connection for id: %d\n", last_resource_handle);
+	create_res_handle(&resource_handles[last_resource_handle], in_config);
 	printf("getting ready to set global rdma value\n");
 //	strcpy(msg, "global changed");
-	sprintf(msg, "global changed to %d", test_param);
+	sprintf(msg, "%d", last_resource_handle);
 	p = msg;
-	printf("Returning...\n");
+	printf("Returning qp_id %s\n", msg);
 	// TODO: create the QP handle like in rdma_queue and store in a global location for hw_1_svc to use when triggered
-
+	printf("Exiting: rmdac_1_svc\n");
 	return(&p);
 }
