@@ -15,6 +15,12 @@ program HELLO_WOLRD_PROG {
 
 program RDMA_CONNECT_PROG {
 	version RDMA_CONNECT_VERS {
-		string RDMAC(void) = 1;
+		string RDMAC(rpc_args_t) = 1;
 	} = 1;
 } = 0x30000825;
+
+program AQUIRE_TCP_PORT_PROG {
+	version AQUIRE_TCP_PORT_VERS {
+		string AQUIREP(void) = 1;
+	} = 1;
+} = 0x30000826;

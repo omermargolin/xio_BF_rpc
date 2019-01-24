@@ -1099,6 +1099,15 @@ void create_res_handle (struct resources *res, struct config_t in_config)
     }
     printf("qp connected\n");
 
+    if (res->sock >= 0)
+      {
+	printf("Closing socket\n");
+	if (close (res->sock))
+	  fprintf (stderr, "failed to close socket\n");
+	res->sock = -1;
+      }
+
+
     return;
 
 main_exit:

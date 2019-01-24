@@ -39,9 +39,10 @@ struct resources
     uint64_t remote_buf_len;	  /* Remote Buffer length */
 
     int sock;                     /* TCP socket file descriptor */
+    u_int32_t tcp_port;           /* TCP port for this connection */
 };
 struct resources resource_handles[MAX_RESOURCE_HANDLES];
-int last_resource_handle = 0;
+int last_resource_handle = -1;
 
 
 
@@ -49,7 +50,7 @@ int last_resource_handle = 0;
 struct config_t in_config = {
     "mlx5_0",                     /* dev_name */
     NULL,                         /* server_name */
-    19875,                        /* tcp_port */
+    20875,                        /* tcp_port */
     1,                            /* ib_port */
     0                             /* gid_idx */
 };
@@ -101,20 +102,36 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
     return (&p);
 }
 
-char **rdmac_1_svc(void *a, struct svc_req *req) {
+char **rdmac_1_svc(rpc_args_t *a, struct svc_req *req) {
 	static char msg[256];
 	static char *p;
 //	resources_init (&res);
 	printf("Entering: rmdac_1_svc\n");
-	last_resource_handle++;  // TODO: Add check that we aren't blowing past the end of the array
-	printf("getting ready to set rdma connection for id: %d\n", last_resource_handle);
-	create_res_handle(&resource_handles[last_resource_handle], in_config);
-	printf("getting ready to set global rdma value\n");
-//	strcpy(msg, "global changed");
-	sprintf(msg, "%d", last_resource_handle);
-	p = msg;
-	printf("Returning qp_id %s\n", msg);
-	// TODO: create the QP handle like in rdma_queue and store in a global location for hw_1_svc to use when triggered
+	rpc_args_t* remote_args = (rpc_args_t*)a;
 
+	printf("getting ready to set rdma connection for id: %d\n", remote_args->qp_num);
+
+
+	create_res_handle(&resource_handles[remote_args->qp_num], in_config);
+	//	printf("getting ready to set global rdma value\n");
+	strcpy(msg, "global changed");
+	/* sprintf(msg, "%d", last_resource_handle); */
+	p = msg;
+	printf("rdmac_1_svc: Returning\n", msg);
+	// TODO: create the QP handle like in rdma_queue and store in a global location for hw_1_svc to use when triggered
+	return(&p);
+}
+
+char **aquirep_1_svc(void *a, struct svc_req *req) {
+	static char msg[256];
+	static char *p;
+//	resources_init (&res);
+	printf("Entering: aquirep_svc\n");
+	last_resource_handle++;  // TODO: Add check that we aren't blowing past the end of the array
+	resource_handles[last_resource_handle].tcp_port = in_config.tcp_port + last_resource_handle;
+	sprintf(msg, "%d, %d", last_resource_handle, in_config.tcp_port+last_resource_handle);
+//	strcpy(msg, "global changed");
+	p = msg;
+	printf("aquirep eturning %s\n", msg);
 	return(&p);
 }

@@ -131,10 +131,16 @@ struct resources
 struct config_t config = {
     NULL,                         /* dev_name */
     NULL,                         /* server_name */
-    19875,                        /* tcp_port */
+    0,                        /* tcp_port */ /* No longer in use
     1,                            /* ib_port */
     -1                            /* gid_idx */
 };
+rpc_args_t rpc_args = {
+        NULL,                         /* src_add*/
+        4096,                         /* len */
+		NULL,						  /* dest add*/
+        -1,                           /* qp_num */
+    };
 
 /******************************************************************************
   Socket operations
@@ -1166,7 +1172,7 @@ void *rdma_connect_to_server_thread(void *cl_t)
 	CLIENT *cl = cl_t;
 	char **p;
 	printf("calling rpc for rdma server\n");
-	p = rdmac_1(NULL, cl);
+	p = rdmac_1(&rpc_args, cl);
 
 	printf("Back from rdma create\n");
 	if (p == NULL) {
@@ -1189,13 +1195,6 @@ main (int argc, char *argv[]) {
     struct resources res;
     char temp_char;
     pthread_t connect_server_thread;
-
-    rpc_args_t rpc_args = {
-        NULL,                         /* src_add*/
-        4096,                         /* len */
-		NULL,						  /* dest add*/
-        -1,                           /* qp_num */
-    };
 
 
 
@@ -1254,6 +1253,35 @@ main (int argc, char *argv[]) {
         return 1;
     }
 
+    // Get tcp port
+    cl = clnt_create(config.server_name, AQUIRE_TCP_PORT_PROG, AQUIRE_TCP_PORT_VERS, "tcp");
+    if (cl == NULL) {
+      clnt_pcreateerror(argv[1]);
+      exit(1);
+    }
+
+    printf("Getting ready to call aquire_tcp_port\n");
+
+    p = aquirep_1(NULL, cl);
+
+    printf("Back from aquire tcp port\n");
+    if (p == NULL) {
+      clnt_perror(cl,argv[1]);
+      exit(1);
+    }
+
+    printf("Returned string=%s\n", *p);
+
+    QP_id = strtol(strtok(*p, ","), NULL, 10);
+    printf("QP_id=%d\n", QP_id);
+
+
+    config.tcp_port = strtol(strtok(strtok(NULL, ","), ","), NULL, 10);
+    printf("port=%d\n", config.tcp_port);
+
+//	Call RPC stating the remote server qp number
+//	rpc_args.qp_num = res.remote_props.qp_num;
+    rpc_args.qp_num = QP_id;
 
 	//Create server qp for this client
 	cl = clnt_create(config.server_name, RDMA_CONNECT_PROG, RDMA_CONNECT_VERS, "tcp");
@@ -1262,7 +1290,7 @@ main (int argc, char *argv[]) {
 		exit(1);
 	}
 
-	printf("Getting ready to call rdma create\n");
+	printf("Getting ready to call rdma create with qp_index %d\n", rpc_args.qp_num);
 	if(pthread_create(&connect_server_thread, NULL, rdma_connect_to_server_thread, (void *)cl)) {
 
 		fprintf(stderr, "Error creating thread\n");
@@ -1299,6 +1327,13 @@ main (int argc, char *argv[]) {
 		fprintf (stderr, "failed to connect QPs\n");
 		goto main_exit;
 	}
+	printf("Closing socket\n");
+	if (res.sock >= 0)
+        {
+            if (close (res.sock))
+                fprintf (stderr, "failed to close socket\n");
+            res.sock = -1;
+        }
 
 //	/* after polling the completion we have the message in the client buffer too */
 //	if (config.server_name)
@@ -1325,13 +1360,13 @@ main (int argc, char *argv[]) {
 		clnt_pcreateerror(argv[1]);
 		exit(1);
 	}
-
-//	Call RPC stating the remote server qp number
-//	rpc_args.qp_num = res.remote_props.qp_num;
-	rpc_args.qp_num = QP_id;
 	printf("Remote queue pair ID=%d\n", rpc_args.qp_num);
 
 	printf("Getting ready to call hello world\n");
+	printf("gone to sleep\n");
+
+	sleep(600);
+
 	p = hw_1(&rpc_args, cl);
 
 	printf("Back from hello world\n");
