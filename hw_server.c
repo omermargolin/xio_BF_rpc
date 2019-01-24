@@ -65,11 +65,34 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
 
 	printf("getting ready to return value\n");
 	printf("given queue number=0x%x\n", remote_args->qp_num);
-	strcpy(msg, "Hello world");
-	p = msg;
-	printf("Returning...\n");
 
-	return(&p);
+	printf("> > > > > Start post_send");
+	res->remote_props= remote_args->src_addr;
+	rc = 0;
+    if (post_send (&res, IBV_WR_RDMA_READ))
+    {
+        fprintf (stderr, "failed to post SR 2\n");
+        rc = 1;
+        if (resources_destroy (&res))
+        {
+            fprintf (stderr, "failed to destroy resources\n");
+            rc = 1;
+        }
+    }
+    if rc
+	{
+        printf("Failed post_send")
+	}
+    else {
+		printf("Buffer: %s", res->buf)
+    }
+//
+//
+//	strcpy(msg, "Hello world");
+//	p = msg;
+//	printf("Returning...\n");
+
+	return(&rc);
 }
 
 char **rdmac_1_svc(void *a, struct svc_req *req) {
