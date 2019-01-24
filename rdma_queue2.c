@@ -348,7 +348,7 @@ post_send (struct resources *res, int opcode)
     /* prepare the scatter/gather entry */
     memset (&sge, 0, sizeof (sge));
     sge.addr = (uintptr_t) res->buf;
-    sge.length = res->;
+    sge.length = res->remote_buf_len;
     sge.lkey = res->mr->lkey;
     /* prepare the send work request */
     memset (&sr, 0, sizeof (sr));

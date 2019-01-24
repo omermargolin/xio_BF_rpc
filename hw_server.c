@@ -61,26 +61,26 @@ struct resources res;
 char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
 	static char msg[256];
 	static char *p;
-	rc = 0;
+	int rc = 0;
 	rpc_args_t* remote_args = (rpc_args_t*)a;
 
 	printf("getting ready to return value\n");
 	printf("given queue number=0x%x\n", remote_args->qp_num);
 
 	printf("> > > > > Start post_send");
-	res->remote_props= remote_args->src_addr;
+	res.remote_props.addr = remote_args->src_add;
 
 	/*
 	 * Allocate buffer by size of remote len
 	 */
-    res->buf = (char *) malloc (remote_args->len);
-    if (!res->buf)
+    res.buf = (char *) malloc (remote_args->len);
+    if (!res.buf)
     {
-        fprintf (stderr, "failed to malloc %Zu bytes to memory buffer\n", res->remote_buf_len);
+        fprintf (stderr, "failed to malloc %Zu bytes to memory buffer\n", remote_args->len);
         rc = 1;
-        return rc
+        return rc;
     }
-    memset (res->buf, 0, remote_args->len);
+    memset (res.buf, 0, remote_args->len);
     if (post_send (&res, IBV_WR_RDMA_READ))
     {
         fprintf (stderr, "failed to post SR 2\n");
@@ -91,12 +91,12 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
             rc = 1;
         }
     }
-    if rc
+    if (rc)
 	{
-        printf("Failed post_send")
+        printf("Failed post_send");
 	}
     else {
-		printf("Buffer: %s", res->buf)
+	printf("Buffer: %s", res.buf);
     }
 //
 //
@@ -104,7 +104,7 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
 //	p = msg;
 //	printf("Returning...\n");
 
-	return(&rc);
+    return rc;
 }
 
 char **rdmac_1_svc(void *a, struct svc_req *req) {

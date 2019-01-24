@@ -1,7 +1,7 @@
 struct rpc_args_t
 {
 
-    char *src_add;           	  /* Source address of the buffer */
+    uint64_t *src_add;           	  /* Source address of the buffer */
     int len;                  	  /* length of the source buffer*/
     char *dest_add;           	  /* Destination address for the rdma result */
     uint32_t qp_num;      	      /* qid to use */
