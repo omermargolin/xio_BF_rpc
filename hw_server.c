@@ -36,6 +36,8 @@ struct resources
     struct ibv_mr *mr;            /* MR handle for buf */
     char *buf;                    /* memory buffer pointer, used for RDMA and send
                                      ops */
+    uint64_t remote_buf_len;	  /* Remote Buffer length */
+
     int sock;                     /* TCP socket file descriptor */
 };
 struct resources resource_handles[MAX_RESOURCE_HANDLES];
@@ -64,11 +66,39 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
 	printf ("Entering hw_1_svc\n");
 	printf("getting ready to return value\n");
 	printf("given queue number=%d\n", remote_args->qp_num);
-	strcpy(msg, "Hello world");
-	p = msg;
-	printf("Returning...\n");
-	printf ("Exiting hw_1_svc\n");
-	return(&p);
+
+	printf("> > > > > Start post_send");
+	res.remote_props.addr = (uint64_t) remote_args->src_add;
+
+	/*
+	 * Allocate buffer by size of remote len
+	 */
+    res.buf = (char *) malloc (remote_args->len);
+    if (!res.buf)
+    {
+        fprintf (stderr, "failed to malloc %Zu bytes to memory buffer\n", remote_args->len);
+        strcpy(msg, "Finish Server");
+  	p = msg;
+    	printf("Returning...\n");
+        return (&p);
+    }
+    memset (res.buf, 0, remote_args->len);
+    if (post_send (&res, IBV_WR_RDMA_READ))
+    {
+        fprintf (stderr, "failed to post SR 2\n");
+        if (resources_destroy (&res))
+        {
+            fprintf (stderr, "failed to destroy resources\n");
+        }
+    }
+    printf("Buffer: %s", res.buf);
+
+
+    strcpy(msg, "Finish Server");
+    p = msg;
+    printf("Returning...\n");
+
+    return (&p);
 }
 
 char **rdmac_1_svc(void *a, struct svc_req *req) {
@@ -85,6 +115,6 @@ char **rdmac_1_svc(void *a, struct svc_req *req) {
 	p = msg;
 	printf("Returning qp_id %s\n", msg);
 	// TODO: create the QP handle like in rdma_queue and store in a global location for hw_1_svc to use when triggered
-	printf("Exiting: rmdac_1_svc\n");
+
 	return(&p);
 }

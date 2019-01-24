@@ -96,6 +96,7 @@ struct resources
     struct ibv_mr *mr;            /* MR handle for buf */
     char *buf;                    /* memory buffer pointer, used for RDMA and send
                                      ops */
+    uint64_t remote_buf_len;	  /* Remote Buffer length */
     int sock;                     /* TCP socket file descriptor */
 };
 struct config_t config = {
@@ -337,7 +338,7 @@ poll_completion (struct resources *res)
  * Description
  * This function will create and post a send work request
  ******************************************************************************/
-static int
+int
 post_send (struct resources *res, int opcode)
 {
     struct ibv_send_wr sr;
@@ -347,7 +348,7 @@ post_send (struct resources *res, int opcode)
     /* prepare the scatter/gather entry */
     memset (&sge, 0, sizeof (sge));
     sge.addr = (uintptr_t) res->buf;
-    sge.length = MSG_SIZE;
+    sge.length = res->remote_buf_len;
     sge.lkey = res->mr->lkey;
     /* prepare the send work request */
     memset (&sr, 0, sizeof (sr));
@@ -402,7 +403,7 @@ post_send (struct resources *res, int opcode)
  * Description
  *
  ******************************************************************************/
-static int
+int
 post_receive (struct resources *res)
 {
     struct ibv_recv_wr rr;
@@ -444,7 +445,7 @@ post_receive (struct resources *res)
  * Description
  * res is initialized to default values
  ******************************************************************************/
-static void
+void
 resources_init (struct resources *res)
 {
     memset (res, 0, sizeof *res);
@@ -468,12 +469,13 @@ resources_init (struct resources *res)
  * This function creates and allocates all necessary system resources. These
  * are stored in res.
  *****************************************************************************/
-static int
+int
 resources_create (struct resources *res)
 {
     struct ibv_device **dev_list = NULL;
     struct ibv_qp_init_attr qp_init_attr;
     struct ibv_device *ib_dev = NULL;
+    res->remote_buf_len=0;
     size_t size;
     int i;
     int mr_flags = 0;
@@ -938,7 +940,7 @@ connect_qp_exit:
  * Description
  * Cleanup and deallocate all resources used
  ******************************************************************************/
-static int
+int
 resources_destroy (struct resources *res)
 {
     int rc = 0;
