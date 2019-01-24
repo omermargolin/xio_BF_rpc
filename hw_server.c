@@ -34,6 +34,8 @@ struct resources
     struct ibv_mr *mr;            /* MR handle for buf */
     char *buf;                    /* memory buffer pointer, used for RDMA and send
                                      ops */
+    uint64_t remote_buf_len;	  /* Remote Buffer length */
+
     int sock;                     /* TCP socket file descriptor */
 };
 
