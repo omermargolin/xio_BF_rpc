@@ -46,6 +46,7 @@
 #define RDMAMSGR "RDMA read operation "
 #define RDMAMSGW "RDMA write operation"
 #define MSG_SIZE (strlen(MSG) + 1)
+#define SHA_SIZE 64
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 static inline uint64_t
 htonll (uint64_t x)
@@ -123,12 +124,15 @@ struct resources
     struct ibv_mr *mr;            /* MR handle for buf */
     char *buf;                    /* memory buffer pointer, used for RDMA and send
                                      ops */
+    struct ibv_mr *dest_mr;            /* MR handle for buf */
+    char *dest_buf;                    /* memory buffer pointer, used for RDMA and send
+                                     ops */
     int sock;                     /* TCP socket file descriptor */
 };
 struct config_t config = {
     NULL,                         /* dev_name */
     NULL,                         /* server_name */
-    19875,                        /* tcp_port */
+    19999,                        /* tcp_port */
     1,                            /* ib_port */
     -1                            /* gid_idx */
 };
@@ -1072,6 +1076,31 @@ usage (const char *argv0)
             " -g, --gid_idx <git index> gid index to be used in GRH (default not used)\n");
 }
 
+int destination_rg_mr (char* dest, struct resources * res){
+	int mr_flags = 0;
+	dest =(char*) malloc (SHA_SIZE);
+	if (!dest)
+	{
+		fprintf (stderr, "failed to malloc %Zu bytes to memory buffer\n", SHA_SIZE);
+		return -1;
+	}
+	memset (dest, 0, SHA_SIZE);
+	/* register the memory buffer */
+	mr_flags = IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ |
+		IBV_ACCESS_REMOTE_WRITE;
+	res->dest_mr = ibv_reg_mr (res->pd, dest, SHA_SIZE, mr_flags);
+	if (!res->dest_mr)
+	{
+		fprintf (stderr, "ibv_reg_mr failed with mr_flags=0x%x\n", mr_flags);
+		free (dest);
+		return 1;
+	}
+	fprintf (stdout,
+			"DESTINATION MR was registered with addr=%p, lkey=0x%x, rkey=0x%x, flags=0x%x\n",
+			dest, res->dest_mr->lkey, res->dest_mr->rkey, mr_flags);
+
+	return 0;
+}
 
 int main_rg_mr(struct resources * res, int size){
 
@@ -1158,6 +1187,92 @@ main_rg_mr_exit:
     return rc;
 }
 
+
+int rpc_rg_mr(char* buffer, struct resources * res, int size){
+
+//	TODO: change size from MSG size
+	size = MSG_SIZE;
+	int rc = 0;
+	int mr_flags = 0;
+	res->buf = buffer;
+	if (!res->buf)
+	{
+		fprintf (stderr, "Null Buffer malloc %Zu bytes to memory buffer\n", size);
+		rc = 1;
+		goto rpc_rg_mr_exit;
+	}
+//	memset (res->buf, 0, size);
+	/* only in the server side put the message in the memory buffer */
+//	if (!config.server_name)
+//	{
+//		strcpy (res->buf, MSG);
+//		fprintf (stdout, "going to send the message: '%s'\n", res->buf);
+//	}
+//	else
+//		memset (res->buf, 0, size);
+	/* register the memory buffer */
+	mr_flags = IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ |
+		IBV_ACCESS_REMOTE_WRITE;
+	res->mr = ibv_reg_mr (res->pd, res->buf, size, mr_flags);
+	if (!res->mr)
+	{
+		fprintf (stderr, "ibv_reg_mr failed with mr_flags=0x%x\n", mr_flags);
+		rc = 1;
+		goto rpc_rg_mr_exit;
+	}
+	fprintf (stdout,
+			"MR was registered with addr=%p, lkey=0x%x, rkey=0x%x, flags=0x%x\n",
+			res->buf, res->mr->lkey, res->mr->rkey, mr_flags);
+
+rpc_rg_mr_exit:
+    if (rc)
+    {
+        /* Error encountered, cleanup */
+        if (res->qp)
+        {
+            ibv_destroy_qp (res->qp);
+            res->qp = NULL;
+        }
+        if (res->mr)
+        {
+            ibv_dereg_mr (res->mr);
+            res->mr = NULL;
+        }
+        /*if (res->buf) buffer was allocated elsewhere...
+        {
+            free (res->buf);
+            res->buf = NULL;
+        }*/
+        if (res->cq)
+        {
+            ibv_destroy_cq (res->cq);
+            res->cq = NULL;
+        }
+        if (res->pd)
+        {
+            ibv_dealloc_pd (res->pd);
+            res->pd = NULL;
+        }
+        if (res->ib_ctx)
+        {
+            ibv_close_device (res->ib_ctx);
+            res->ib_ctx = NULL;
+        }
+//        if (dev_list)
+//        {
+//            ibv_free_device_list (dev_list);
+//            dev_list = NULL;
+//        }
+        if (res->sock >= 0)
+        {
+            if (close (res->sock))
+                fprintf (stderr, "failed to close socket\n");
+            res->sock = -1;
+        }
+    }
+    return rc;
+}
+
 void *rdma_connect_to_server_thread(void *cl_t)
 {
 	CLIENT *cl = cl_t;
@@ -1193,7 +1308,8 @@ main (int argc, char *argv[]) {
         -1,                           /* qp_num */
     };
 
-
+	char input_buffer [] ={'T','e','a','m','X','S','t','r','i','n','g'};
+	int input_len = strlen(input_buffer);
 
 //	if (argc != 2) {
 //		printf("Usage: client hostname\n");
@@ -1283,10 +1399,16 @@ main (int argc, char *argv[]) {
 		goto main_exit;
 	}
 
-	if (main_rg_mr (&res, MSG_SIZE))
+/*	if (main_rg_mr (&res, MSG_SIZE))
 	{
 				fprintf (stderr, "failed to register memory region\n");
 				goto main_exit;
+	}
+*/
+	if (rpc_rg_mr(input_buffer,&res,input_len))
+	{
+		fprintf (stderr, "failed to register memory region\n");
+		goto main_exit;
 	}
 
 	/* connect the QPs */
@@ -1324,7 +1446,17 @@ main (int argc, char *argv[]) {
 
 //	Call RPC stating the remote server qp number
 	rpc_args.qp_num = res.remote_props.qp_num;
+    rpc_args.src_add = res.buf;
+	
+	if (destination_rg_mr(rpc_args.dest_add,&res)==1)
+		printf("Error allocating result buffer!");
+	res.dest_buf = rpc_args.dest_add;
+	rpc_args.len = input_len;
+
 	printf("Remote queue pair number=0x%x\n", rpc_args.qp_num);
+	printf("Length=0x%x\n", rpc_args.len);
+	printf("dest_buf=%s\n", rpc_args.dest_add);
+	printf("buffer=0x%x\n", rpc_args.src_add);
 
 	printf("Getting ready to call hello world\n");
 	p = hw_1(&rpc_args, cl);
