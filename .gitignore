@@ -1,0 +1,8 @@
+*.o
+*~
+client
+server
+hw.h
+hw_clnt.c
+hw_svc.c
+hw_xdr.c

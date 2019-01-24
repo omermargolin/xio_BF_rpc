@@ -1,4 +1,4 @@
-all: client server rdma
+all: client server
 
 hw.h: hw.x
 	rpcgen hw.x
@@ -11,9 +11,6 @@ client: main.o hw_clnt.o hw_xdr.o
 server: hw_server.o hw_svc.o hw_xdr.o rdma_queue2.o
 	cc -O3 -Wall -L/usr/lib -libverbs -o server hw_server.o hw_svc.o hw_xdr.o rdma_queue2.o -lnsl
 
-rdma: rdma_queue.o
-	cc -O3 -Wall -L/usr/lib rdma_queue.c -libverbs -o rdma_server
-	
 
 .PHONY: clean
 
