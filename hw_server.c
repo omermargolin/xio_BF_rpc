@@ -3,7 +3,7 @@
 #include <infiniband/verbs.h>
 
 #define MAX_RESOURCE_HANDLES 20
-
+//dumb
 struct cm_con_data_t
 {
     uint64_t addr;                /* Buffer address */
