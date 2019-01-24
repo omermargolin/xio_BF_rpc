@@ -131,7 +131,7 @@ struct resources
 struct config_t config = {
     NULL,                         /* dev_name */
     NULL,                         /* server_name */
-    0,                        /* tcp_port */ /* No longer in use
+    0,                        /* tcp_port */ /* No longer in use*/
     1,                            /* ib_port */
     -1                            /* gid_idx */
 };
@@ -1291,6 +1291,7 @@ main (int argc, char *argv[]) {
 	}
 
 	printf("Getting ready to call rdma create with qp_index %d\n", rpc_args.qp_num);
+
 	if(pthread_create(&connect_server_thread, NULL, rdma_connect_to_server_thread, (void *)cl)) {
 
 		fprintf(stderr, "Error creating thread\n");

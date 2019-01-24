@@ -15,21 +15,8 @@
  * RDMA Write
  *
  *****************************************************************************/
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <inttypes.h>
-#include <endian.h>
-#include <byteswap.h>
-#include <getopt.h>
-#include <sys/time.h>
-#include <arpa/inet.h>
-#include <infiniband/verbs.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
+
+#include "xcommon.h"
 /* poll CQ timeout in millisec (2 seconds) */
 #define MAX_POLL_CQ_TIMEOUT 2000
 #define MSG "SEND operation "
@@ -37,6 +24,15 @@
 #define RDMAMSGW "RDMA write operation"
 #define MSG_SIZE (strlen(MSG) + 1)
 #if __BYTE_ORDER == __LITTLE_ENDIAN
+
+struct config_t config = {
+    NULL,                         /* dev_name */
+    NULL,                         /* server_name */
+    19875,                        /* tcp_port */
+    1,                            /* ib_port */
+    -1                            /* gid_idx */
+};
+
 static inline uint64_t
 htonll (uint64_t x)
 {
@@ -65,48 +61,6 @@ ntohll (uint64_t x)
 #error __BYTE_ORDER is neither __LITTLE_ENDIAN nor __BIG_ENDIAN
 #endif
 /* structure of test parameters */
-struct config_t
-{
-    const char *dev_name;         /* IB device name */
-    char *server_name;            /* server host name */
-    u_int32_t tcp_port;           /* server TCP port */
-    int ib_port;                  /* local IB port to work with */
-    int gid_idx;                  /* gid index to use */
-};
-/* structure to exchange data which is needed to connect the QPs */
-struct cm_con_data_t
-{
-    uint64_t addr;                /* Buffer address */
-    uint32_t rkey;                /* Remote key */
-    uint32_t qp_num;              /* QP number */
-    uint16_t lid;                 /* LID of the IB port */
-    uint8_t gid[16];              /* gid */
-} __attribute__ ((packed));
-/* structure of system resources */
-struct resources
-{
-    struct ibv_device_attr device_attr;
-    /* Device attributes */
-    struct ibv_port_attr port_attr;       /* IB port attributes */
-    struct cm_con_data_t remote_props;    /* values to connect to remote side */
-    struct ibv_context *ib_ctx;   /* device handle */
-    struct ibv_pd *pd;            /* PD handle */
-    struct ibv_cq *cq;            /* CQ handle */
-    struct ibv_qp *qp;            /* QP handle */
-    struct ibv_mr *mr;            /* MR handle for buf */
-    char *buf;                    /* memory buffer pointer, used for RDMA and send
-                                     ops */
-    uint64_t remote_buf_len;	  /* Remote Buffer length */
-    int sock;                     /* TCP socket file descriptor */
-};
-struct config_t config = {
-    NULL,                         /* dev_name */
-    NULL,                         /* server_name */
-    19875,                        /* tcp_port */
-    1,                            /* ib_port */
-    -1                            /* gid_idx */
-};
-
 /******************************************************************************
   Socket operations
   For simplicity, the example program uses TCP sockets to exchange control
@@ -233,6 +187,7 @@ sock_connect_exit:
 int
 sock_sync_data (int sock, int xfer_size, char *local_data, char *remote_data)
 {
+  printf("Enter sock_sync_data sock: %d", sock);
     int rc;
     int read_bytes = 0;
     int total_read_bytes = 0;
@@ -392,7 +347,8 @@ post_send (struct resources *res, int opcode)
  * Function: post_receive
  *
  * Input
- * res pointer to resources structure
+ * res pointer to resources
+ structure
  *
  * Output
  * none
