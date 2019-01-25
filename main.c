@@ -44,13 +44,14 @@
 #include <pthread.h>
 /* poll CQ timeout in millisec (2 seconds) */
 #define MAX_POLL_CQ_TIMEOUT 2000
-#define MSG "TeamX String"
+#define MSG "1234567890"
 #define RDMAMSGR "RDMA read operation "
 #define SHA_SIZE 64
 #define RDMAMSGW "RDMA write operation"
-#define MSG_SIZE (strlen(MSG) + 1000)
+#define MSG_SIZE (1024*1024 +1000)
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 int QP_id;
+char mega_message[MSG_SIZE];
 #define USER_BUFFER_SIZE 4096
 static inline uint64_t
 htonll (uint64_t x)
@@ -151,6 +152,13 @@ rpc_args_t rpc_args = {
 			0                             /*dest_key*/
 };
 
+static void
+make_message() {
+  int i;
+  for (i = 0; i < MSG_SIZE; i++) {
+    mega_message[i] = 'M';
+      }
+}
 /******************************************************************************
   Socket operations
   For simplicity, the example program uses TCP sockets to exchange control
@@ -647,8 +655,9 @@ resources_create (struct resources *res)
     //    }
     //    else
     //       memset (res->buf, 0, size);
-    strcpy (res->buf, MSG);
-    fprintf (stdout, "going to send the message: '%s'\n", res->buf);
+    make_message();
+    strcpy (res->buf, mega_message);
+    //    fprintf (stdout, "going to send the message: '%s'\n", res->buf);
    /* register the memory buffer */
     mr_flags = IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ |
        IBV_ACCESS_REMOTE_WRITE;
@@ -1508,9 +1517,11 @@ main (int argc, char *argv[]) {
         rpc_args.len = 12*8;//YOSSI Hard coded....
 
 	//        printf("RPC args fields:\n qp_num=0x%x\t src_add:%p\n len=%d\t dest=%p\n", rpc_args.qp_num,rpc_args.src_add,rpc_args.len,rpc_args.dest_add);
-
-	p = hw_1(&rpc_args, cl);
-
+	int i;
+	for (i =0; i< 1; i++) {
+	  p = hw_1(&rpc_args, cl);
+	  printf("call %d", i);
+	}
 	printf("Back from hello world\n");
 	if (p == NULL) {
 		clnt_perror(cl,argv[1]);
