@@ -29,6 +29,7 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
 	printf("given queue number=%d\n", remote_args->qp_num);
     printf("src value:%p\n", remote_args->src_add);
     printf("dest value:%p\n", remote_args->dest_add);
+    printf("dest key: %x\n", remote_args->dest_key);
 
   // printf("address:%p\n", &remote_args->src_add);
   //printf("*address:%s\n", *remote_args->src_add);
@@ -64,13 +65,29 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
             fprintf (stderr, "failed to destroy resources\n");
         }
     }
-    sleep(2);
     rc = poll_completion(&resource_handles[remote_args->qp_num]);
 
     printf("Buffer: %s\n", resource_handles[remote_args->qp_num].buf);
 
     strcpy(msg, "Finish Server");
     p = msg;
+/*And now return the SHA result*/
+
+    resource_handles[remote_args->qp_num].remote_props.addr =  remote_args->dest_add;
+    resource_handles[remote_args->qp_num].remote_buf_len = 64;
+    resource_handles[remote_args->qp_num].remote_props.rkey = remote_args->dest_key;
+
+    sprintf(resource_handles[remote_args->qp_num].buf,"12345678");
+    if (post_send (&resource_handles[remote_args->qp_num], IBV_WR_RDMA_WRITE))
+    {
+        fprintf (stderr, "failed to post SR 2\n");
+        if (resources_destroy (&resource_handles[remote_args->qp_num]))
+        {
+            fprintf (stderr, "failed to destroy resources\n");
+        }
+    }
+    sleep(2);
+
     printf("Returning...\n");
 
     return (&p);

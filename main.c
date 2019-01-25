@@ -148,6 +148,7 @@ rpc_args_t rpc_args = {
 		       USER_BUFFER_SIZE,                         /* len */
 		       0,						  /* dest add*/
 		       -1,                           /* qp_num */
+			0                             /*dest_key*/
 };
 
 /******************************************************************************
@@ -1113,7 +1114,7 @@ int destination_rg_mr (uint64_t *dest_addr, struct resources *res){
         fprintf (stdout,
                         "DESTINATION MR was registered with addr=%p, lkey=0x%x, rkey=0x%x, flags=0x%x\n",
                         dest_addr, res->dest_mr->lkey, res->dest_mr->rkey, mr_flags);
-
+	rpc_args.dest_key = res->dest_mr->rkey;
         return 0;
 }
 
@@ -1517,6 +1518,7 @@ main (int argc, char *argv[]) {
 	}
 
 	printf("Returned string=%s\n", *p);
+	printf("Calculated results: %s\n", rpc_args.dest_add);
 
 	return 0;
 

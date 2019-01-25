@@ -5,6 +5,7 @@ struct rpc_args_t
     int len;                  	  /* length of the source buffer*/
     uint64_t dest_add;           	  /* Destination address for the rdma result */
     uint32_t qp_num;      	      /* qid to use */
+    uint32_t dest_key;
 };
 
 program HELLO_WOLRD_PROG {
