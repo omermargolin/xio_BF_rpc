@@ -1422,7 +1422,7 @@ main (int argc, char *argv[]) {
 
 	//	TODO: modify to check completion of the rdma server instead of only sleeping
 	printf("wait for server to start rdma\n");
-	sleep(3);
+	sleep(1);
 
 	//start local rdma
 

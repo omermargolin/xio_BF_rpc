@@ -43,6 +43,7 @@ struct resources
     uint64_t remote_buf_len;	  /* Remote Buffer length */
     int sock;                     /* TCP socket file descriptor */
     int tcp_port;
+
 };
 
 struct config_t
