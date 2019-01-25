@@ -42,14 +42,13 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <pthread.h>
-// #include "rdma.h"    alan1
 /* poll CQ timeout in millisec (2 seconds) */
 #define MAX_POLL_CQ_TIMEOUT 2000
-#define MSG "SEND operation "
+#define MSG "TeamX String"
 #define RDMAMSGR "RDMA read operation "
 #define SHA_SIZE 64
 #define RDMAMSGW "RDMA write operation"
-#define MSG_SIZE (strlen(MSG) + 1)
+#define MSG_SIZE (strlen(MSG) + 1000)
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 int QP_id;
 #define USER_BUFFER_SIZE 4096
@@ -116,14 +115,6 @@ struct cm_con_data_t
     uint8_t gid[16];              /* gid */
 } __attribute__ ((packed));
 /* structure of system resources */
-//alan1
-//struct config_t config = {
-//    NULL,                         /* dev_name */
-//    NULL,                         /* server_name */
-//    19875,                        /* tcp_port */
-//    1,                            /* ib_port */
-//    -1                            /* gid_idx */
-//};
 
 struct resources
 {
@@ -639,7 +630,7 @@ resources_create (struct resources *res)
     }
     /* allocate the memory buffer that will hold the data */
     size = MSG_SIZE;
-    res->buf = (uint64_t *) malloc (size);
+    res->buf = (char *) malloc (size);
     if (!res->buf)
     {
        fprintf (stderr, "failed to malloc %Zu bytes to memory buffer\n", size);
@@ -648,13 +639,15 @@ resources_create (struct resources *res)
     }
     memset (res->buf, 0, size);
     /* only in the server side put the message in the memory buffer */
-    if (!config.server_name)
-    {
-        strcpy (res->buf, MSG);
-        fprintf (stdout, "going to send the message: '%s'\n", res->buf);
-    }
-    else
-       memset (res->buf, 0, size);
+    //    if (!config.server_name)
+    //    {
+    //        strcpy (res->buf, MSG);
+    //        fprintf (stdout, "going to send the message: '%s'\n", res->buf);
+    //    }
+    //    else
+    //       memset (res->buf, 0, size);
+    strcpy (res->buf, MSG);
+    fprintf (stdout, "going to send the message: '%s'\n", res->buf);
    /* register the memory buffer */
     mr_flags = IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ |
        IBV_ACCESS_REMOTE_WRITE;
@@ -940,15 +933,16 @@ connect_qp (struct resources *res)
         goto connect_qp_exit;
     }
     /* let the client post RR to be prepared for incoming messages */
-    if (config.server_name)
-    {
-        rc = post_receive (res);
-        if (rc)
-        {
-            fprintf (stderr, "failed to post RR\n");
-            goto connect_qp_exit;
-        }
-    }
+    // Matan thinks we may need this back
+//    if (config.server_name)
+//    {
+//        rc = post_receive (res);
+//        if (rc)
+//        {
+//            fprintf (stderr, "failed to post RR\n");
+//            goto connect_qp_exit;
+//        }
+//    }
     /* modify the QP to RTR */
     rc =
         modify_qp_to_rtr (res->qp, remote_con_data.qp_num, remote_con_data.lid,
@@ -1499,7 +1493,9 @@ main (int argc, char *argv[]) {
     // printf("dest_addr before rg mr :%p\n",&(rpc_args.dest_add));
     // printf("dest_addr before rg mr :%p\n",(rpc_args.dest_add));
     // printf("dest_addr len :%d\n",sizeof(rpc_args.dest_add));
-    // printf("src_addr len :%d\n",sizeof(rpc_args.src_add));
+    printf("src_addr:%p\n",rpc_args.src_add);
+    printf("src_addr len :%d\n",sizeof(rpc_args.src_add));
+
     // printf("len len :%d\n",sizeof(rpc_args.len));
     // printf("qp_num len :%d\n",sizeof(rpc_args.qp_num));
 

@@ -14,32 +14,44 @@ struct config_t in_config = {
     0                             /* gid_idx */
 };
 
+int test_param=5;
 struct resources resource_handles[MAX_RESOURCE_HANDLES];
 int last_resource_handle = -1;
 
-int test_param=5;
 
 char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
 	static char msg[256];
 	static char *p;
-
 	rpc_args_t* remote_args = (rpc_args_t*)a;
+	int rc;
 	printf ("Entering hw_1_svc\n");
 	printf("getting ready to return value\n");
 	printf("given queue number=%d\n", remote_args->qp_num);
+    printf("src value:%p\n", remote_args->src_add);
+    printf("dest value:%p\n", remote_args->dest_add);
+
+  // printf("address:%p\n", &remote_args->src_add);
+  //printf("*address:%s\n", *remote_args->src_add);
+
+  printf("len:%d\n", remote_args->len);
+
+  // printf("dest val:%s\n", remote_args->dest_add);
+  // printf("dest add:%p\n", &remote_args->dest_add);
+  // printf("dest ref val:%s\n", *remote_args->dest_add);
+
 
 	printf("> > > > > Start post_send");
-     	resource_handles[remote_args->qp_num].remote_props.addr = (uint64_t) remote_args->src_add;
+     	resource_handles[remote_args->qp_num].remote_props.addr =  remote_args->src_add;
+	resource_handles[remote_args->qp_num].remote_buf_len = remote_args->len;
 
     	/*
     	 * Allocate buffer by size of remote len
     	 */
-    resource_handles[remote_args->qp_num].buf = (char *) malloc (remote_args->len);
     if (!resource_handles[remote_args->qp_num].buf)
     {
         fprintf (stderr, "failed to malloc %Zu bytes to memory buffer\n", remote_args->len);
         strcpy(msg, "Finish Server");
-    	p = msg;
+  	    p = msg;
     	printf("Returning...\n");
         return (&p);
     }
@@ -52,8 +64,10 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
             fprintf (stderr, "failed to destroy resources\n");
         }
     }
-    printf("Buffer: %s", resource_handles[remote_args->qp_num].buf);
+    sleep(2);
+    rc = poll_completion(&resource_handles[remote_args->qp_num]);
 
+    printf("Buffer: %s\n", resource_handles[remote_args->qp_num].buf);
 
     strcpy(msg, "Finish Server");
     p = msg;
@@ -79,6 +93,7 @@ char **rdmac_1_svc(rpc_args_t *a, struct svc_req *req) {
 	p = msg;
 	printf("rdmac_1_svc: Returning\n", msg);
 	// TODO: create the QP handle like in rdma_queue and store in a global location for hw_1_svc to use when triggered
+
 	return(&p);
 }
 

@@ -22,7 +22,7 @@
 #define MSG "SEND operation "
 #define RDMAMSGR "RDMA read operation "
 #define RDMAMSGW "RDMA write operation"
-#define MSG_SIZE (strlen(MSG) + 1)
+#define MSG_SIZE (strlen(MSG) + 1000)
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 
 struct config_t config = {
@@ -187,7 +187,6 @@ sock_connect_exit:
 int
 sock_sync_data (int sock, int xfer_size, char *local_data, char *remote_data)
 {
-  printf("Enter sock_sync_data sock: %d", sock);
     int rc;
     int read_bytes = 0;
     int total_read_bytes = 0;
@@ -228,7 +227,7 @@ sock_sync_data (int sock, int xfer_size, char *local_data, char *remote_data)
  * poll the queue until MAX_POLL_CQ_TIMEOUT milliseconds have passed.
  *
  ******************************************************************************/
-static int
+int
 poll_completion (struct resources *res)
 {
     struct ibv_wc wc;
@@ -302,7 +301,13 @@ post_send (struct resources *res, int opcode)
     int rc;
     /* prepare the scatter/gather entry */
     memset (&sge, 0, sizeof (sge));
-    sge.addr = (uintptr_t) res->buf;
+    printf("res:%p\n",res);
+    printf("post send before rkey :%x\n" , res->remote_props.rkey);
+    printf("radd %p\n", res->remote_props.addr);
+    sge.addr = (uintptr_t) (res->buf);
+    printf("TEST");
+    fflush(stdout);
+
     sge.length = res->remote_buf_len;
     sge.lkey = res->mr->lkey;
     /* prepare the send work request */
@@ -347,8 +352,7 @@ post_send (struct resources *res, int opcode)
  * Function: post_receive
  *
  * Input
- * res pointer to resources
- structure
+ * res pointer to resources structure
  *
  * Output
  * none
@@ -552,14 +556,14 @@ resources_create (struct resources *res)
         goto resources_create_exit;
     }
     memset (res->buf, 0, size);
-    /* only in the server side put the message in the memory buffer */
-    if (!config.server_name)
-    {
-        strcpy (res->buf, MSG);
-        fprintf (stdout, "going to send the message: '%s'\n", res->buf);
-    }
-    else
-        memset (res->buf, 0, size);
+    //    /* only in the server side put the message in the memory buffer */
+    //    if (!config.server_name)
+    //    {
+    //        strcpy (res->buf, MSG);
+    //        fprintf (stdout, "going to send the message: '%s'\n", res->buf);
+    //    }
+    //    else
+    //        memset (res->buf, 0, size);
     /* register the memory buffer */
     mr_flags = IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ |
         IBV_ACCESS_REMOTE_WRITE;
@@ -1054,15 +1058,6 @@ void create_res_handle (struct resources *res, struct config_t in_config)
         goto main_exit;
     }
     printf("qp connected\n");
-
-    if (res->sock >= 0)
-      {
-	printf("Closing socket\n");
-	if (close (res->sock))
-	  fprintf (stderr, "failed to close socket\n");
-	res->sock = -1;
-      }
-
 
     return;
 
