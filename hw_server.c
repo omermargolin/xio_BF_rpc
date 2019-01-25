@@ -1,15 +1,14 @@
 #include "hw.h"
 #include "xcommon.h"
-#include <infiniband/verbs.h>
 
 #define MAX_RESOURCE_HANDLES 20
-
+#define INITIAL_PORT 19875
 
 //./rdma_server -g 0 -d mlx5_0
 struct config_t in_config = {
     "mlx5_0",                     /* dev_name */
     NULL,                         /* server_name */
-    19875,                        /* tcp_port */
+    INITIAL_PORT,                        /* tcp_port */
     1,                            /* ib_port */
     0                             /* gid_idx */
 };
@@ -120,8 +119,8 @@ char **aquirep_1_svc(void *a, struct svc_req *req) {
 //	resources_init (&res);
 	printf("Entering: aquirep_svc\n");
 	last_resource_handle++;  // TODO: Add check that we aren't blowing past the end of the array
-	resource_handles[last_resource_handle].tcp_port = in_config.tcp_port + last_resource_handle;
-	sprintf(msg, "%d, %d", last_resource_handle, in_config.tcp_port+last_resource_handle);
+	resource_handles[last_resource_handle].tcp_port = INITIAL_PORT + last_resource_handle;
+	sprintf(msg, "%d, %d", last_resource_handle, resource_handles[last_resource_handle].tcp_port);
 //	strcpy(msg, "global changed");
 	p = msg;
 	printf("aquirep eturning %s\n", msg);
