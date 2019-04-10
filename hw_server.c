@@ -20,7 +20,7 @@ int last_resource_handle = -1;
 char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
     static char msg[256];
     static char *result_p;
-    static char *buffer;
+    static char *buffer, de_buffer;
     // rpc_args_t* remote_args = (rpc_args_t*)a;
     int rc;
     printf ("Entering hw_1_svc\n");
@@ -40,8 +40,8 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
     {
        fprintf (stderr, "failed to malloc %Zu bytes to memory buffer\n", remote_args->num_lbas * 512);
        strcpy(msg, "Finish Server");
-        result_p = msg;
-        printf("Returning...\n");
+       result_p = msg;
+       printf("Returning...\n");
        return (&result_p);
     }
 
@@ -55,6 +55,26 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
        return (&result_p);
     }
 
+    de_buffer = (char *) malloc (4096);
+	if (!de_buffer)
+	{
+	   fprintf (stderr, "failed to malloc 4096 bytes to memory buffer\n");
+	   strcpy(msg, "Finish Server");
+	   result_p = msg;
+	   printf("Returning...\n");
+	   return (&result_p);
+	}
+
+
+    rc = decompress_data(buffer, remote_args->num_lbas * 512, de_buffer, 4096);
+    if (rc)
+    {
+       fprintf (stderr, "failed to decompress data\n");
+       strcpy(msg, "Finish Server");
+ 	   result_p = msg;
+ 	   printf("Returning...\n");
+       return (&result_p);
+    }
     //printf("*address:%s\n", *remote_args->src_add);
     //     printf("len:%d\n", remote_args->len);
     //     printf("dest val:%s\n", remote_args->dest_add);
@@ -127,6 +147,9 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
     sleep(2);
 
     printf("Returning...\n");
+    // TODO: make sure to free memory before returning
+    // free(buffer);
+    // free(de_buffer);
     return (&result_p);
 }
 
