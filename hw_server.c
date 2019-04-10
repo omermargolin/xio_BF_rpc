@@ -96,13 +96,11 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
 
     printf("Buffer: %s\n", resource_handles[remote_args->qp_num].buf);
 
-    uint8_t result[128];
+    uint8_t result[20];  // Use 32 for sha256
 
     printf("Calc SHA1\n");
-    //    Sha1(resource_handles[remote_args->qp_num].buf, remote_args->len, result );
-    Sha2_256(resource_handles[remote_args->qp_num].buf, remote_args->len, &result );
-  printf("SHA Calc done\n");
-    fflush(stdout);
+    Sha1(resource_handles[remote_args->qp_num].buf, remote_args->len, result );
+    //Sha2_256(resource_handles[remote_args->qp_num].buf, remote_args->len, &result );
     printf("Result after SHA: ");
     int x;
     for(x = 0; x < 128; x++)
