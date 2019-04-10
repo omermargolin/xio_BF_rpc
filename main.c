@@ -1301,7 +1301,7 @@ void *rdma_connect_to_server_thread(void *cl_t)
 }
 
 
-
+//This is the entry point for clients
 
 main (int argc, char *argv[]) {
 
