@@ -152,8 +152,8 @@ rpc_args_t rpc_args = {
 			   0,                             /*dest_key*/
 			   "/dev/loop0",                /*device name to read from and write to */
 			   0,							/*lba*/
-			   8,							/*num lbas*/
-			   9							/*dest lba*/
+			   4,							/*num lbas*/
+			   5							/*dest lba*/
 };
 
 static void

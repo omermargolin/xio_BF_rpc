@@ -39,6 +39,7 @@ int last_resource_handle = -1;
 char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
 	static char msg[256];
 	static char *p;
+	static char *buffer;
 	rpc_args_t* remote_args = (rpc_args_t*)a;
 	int rc;
 	printf ("Entering hw_1_svc\n");
@@ -54,6 +55,27 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
     printf("read from lba:%d\n", remote_args->lba);
     printf("read %d lbas.\n", remote_args->num_lbas);
     printf("write to lba:%d\n", remote_args->dest_lba);
+
+
+    buffer = (char *) malloc (remote_args->num_lbas * 512);
+    if (!buffer)
+    {
+       fprintf (stderr, "failed to malloc %Zu bytes to memory buffer\n", remote_args->num_lbas * 512);
+       strcpy(msg, "Finish Server");
+ 	   p = msg;
+ 	   printf("Returning...\n");
+       return (&p);
+    }
+
+    rc = read_blkdev(remote_args->device_name, remote_args->lba, remote_args->num_lbas, buffer);
+    if (rc)
+    {
+       fprintf (stderr, "failed to read from device\n");
+       strcpy(msg, "Finish Server");
+ 	   p = msg;
+ 	   printf("Returning...\n");
+       return (&p);
+    }
 
     //printf("*address:%s\n", *remote_args->src_add);
 
