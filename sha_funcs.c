@@ -28,24 +28,16 @@ void Sha1(uint8_t *data_ptr, uint32_t data_len, uint8_t *hash_result)
     uint64_t total_bit_len;
     uint32_t num_whole_blks, whole_blks_len;
     uint8_t  in_buf[64], state[20];
-    printf("Start SHA1 after init\n");
-    printf("data_ptr:%p\n",data_ptr);
-    printf("len data_ptr:%d\n",sizeof(data_ptr));
-    printf("data_ptr:%s\n",data_ptr);
 
     total_bit_len = 8 * data_len;
     memcpy(&state[0], SHA1_INIT, sizeof(state));
-    printf("111Start SHA1 after init\n");
 
     // Do an even number of 64-byte SHA1 input data blocks:
     num_whole_blks = data_len / 64;
-    printf("num_whole_blks:%d\n",num_whole_blks);
 
     if (num_whole_blks != 0)
     {
-        printf("Inside blk\n");
         whole_blks_len = 64 * num_whole_blks;
-        printf("before fastSHA\n");
 
         FastSha1Data(state, data_ptr, whole_blks_len);
         data_ptr += whole_blks_len;
@@ -53,28 +45,20 @@ void Sha1(uint8_t *data_ptr, uint32_t data_len, uint8_t *hash_result)
     }
 
     // Now do the final blk or 2.  Note that data_len MUST be <= 63 here.
-    printf("After Fast SHA\n");
-    fflush(stdout);
     memset(in_buf, 0, sizeof(in_buf));
     if (data_len != 0)
         memcpy(in_buf, data_ptr, data_len);
 
 
-    printf("After Memset\n");
-    fflush(stdout);
     in_buf[data_len] = 0x80;
     if (56 <= data_len)
     {
         FastSha1Data(state, in_buf, 64);
         memset(in_buf, 0, 64);
     }
-    printf("After Second FastSha1Data\n");
-    fflush(stdout);
     STORE_BE8(&in_buf[56], total_bit_len);
     FastSha1Data(state, in_buf, 64);
     BigEndian4Copy(state, hash_result, 5);
-    printf("After Second FastSha1Data\n");
-    fflush(stdout);
 }
 
 void Sha2_256(uint8_t *data_ptr, uint32_t data_len, uint8_t *hash_result)
