@@ -149,7 +149,11 @@ rpc_args_t rpc_args = {
 		       USER_BUFFER_SIZE,                         /* len */
 		       0,						  /* dest add*/
 		       -1,                           /* qp_num */
-			0                             /*dest_key*/
+			   0,                             /*dest_key*/
+			   "/dev/loop0",                /*device name to read from and write to */
+			   0,							/*lba*/
+			   8,							/*num lbas*/
+			   9							/*dest lba*/
 };
 
 static void

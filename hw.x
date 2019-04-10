@@ -6,6 +6,11 @@ struct rpc_args_t
     uint64_t dest_add;           	  /* Destination address for the rdma result */
     uint32_t qp_num;      	      /* qid to use */
     uint32_t dest_key;
+    char device_name[11];          /*device name to read from and write to */
+    uint32_t lba;
+    uint32_t num_lbas;
+    uint32_t dest_lba;
+    
 };
 
 program HELLO_WOLRD_PROG {

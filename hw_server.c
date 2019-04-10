@@ -42,13 +42,19 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
 	rpc_args_t* remote_args = (rpc_args_t*)a;
 	int rc;
 	printf ("Entering hw_1_svc\n");
-    	printf("getting ready to return value\n");
-    	printf("given queue number=%d\n", remote_args->qp_num);
+	printf("getting ready to return value\n");
+    printf("given queue number=%d\n", remote_args->qp_num);
     printf("src value:%p\n", remote_args->src_add);
     printf("dest value:%p\n", remote_args->dest_add);
     printf("dest key: %x\n", remote_args->dest_key);
 
     printf("address:%p\n", &remote_args->src_add);
+
+    printf("device name is:%s\n", remote_args->device_name);
+    printf("read from lba:%d\n", remote_args->lba);
+    printf("read %d lbas.\n", remote_args->num_lbas);
+    printf("write to lba:%d\n", remote_args->dest_lba);
+
     //printf("*address:%s\n", *remote_args->src_add);
 
     //	 printf("len:%d\n", remote_args->len);
@@ -59,7 +65,7 @@ char **hw_1_svc(rpc_args_t *a, struct svc_req *req) {
 
 
 	printf("> > > > > Start post_send");
-     	resource_handles[remote_args->qp_num].remote_props.addr =  remote_args->src_add;
+    resource_handles[remote_args->qp_num].remote_props.addr =  remote_args->src_add;
 	resource_handles[remote_args->qp_num].remote_buf_len = remote_args->len;
 
     	/*
