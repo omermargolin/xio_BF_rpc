@@ -98,17 +98,17 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
     }
 
     memset (resource_handles[remote_args->qp_num].buf, 0, remote_args->len);
-    if (post_send (&resource_handles[remote_args->qp_num], IBV_WR_RDMA_READ))
-    {
-        fprintf (stderr, "failed to post SR 2\n");
-        if (resources_destroy (&resource_handles[remote_args->qp_num]))
-        {
-            fprintf (stderr, "failed to destroy resources\n");
-        }
-    }
-    rc = poll_completion(&resource_handles[remote_args->qp_num]);
+//    if (post_send (&resource_handles[remote_args->qp_num], IBV_WR_RDMA_READ))
+//    {
+//        fprintf (stderr, "failed to post SR 2\n");
+//        if (resources_destroy (&resource_handles[remote_args->qp_num]))
+//        {
+//            fprintf (stderr, "failed to destroy resources\n");
+//        }
+//    }
+//    rc = poll_completion(&resource_handles[remote_args->qp_num]);
 
-    printf("Buffer: %s\n", resource_handles[remote_args->qp_num].buf);
+//    printf("Buffer: %s\n", resource_handles[remote_args->qp_num].buf);
 
     uint8_t result[20];  // Use 32 for sha256
 
@@ -125,13 +125,13 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
     result_p = msg;
     /*return the SHA result*/
 
-    resource_handles[remote_args->qp_num].remote_props.addr =  remote_args->dest_add;
-    uint64_t temp_len =  resource_handles[remote_args->qp_num].remote_buf_len;
-    resource_handles[remote_args->qp_num].remote_buf_len = 64;
-    uint32_t rkey_temp = resource_handles[remote_args->qp_num].remote_props.rkey;
+    resource_handles[remote_args->qp_num].remote_props.addr = remote_args->dest_add;
+//    uint64_t temp_len = resource_handles[remote_args->qp_num].remote_buf_len;
+    resource_handles[remote_args->qp_num].remote_buf_len = remote_args->len;
+//    uint32_t rkey_temp = resource_handles[remote_args->qp_num].remote_props.rkey;
 
     resource_handles[remote_args->qp_num].remote_props.rkey = remote_args->dest_key;
-    printf("rkey: %x, saved rkey\n", resource_handles[remote_args->qp_num].remote_props.rkey ,rkey_temp);
+    printf("rkey: %x\n", resource_handles[remote_args->qp_num].remote_props.rkey);
     sprintf(resource_handles[remote_args->qp_num].buf, result);
     if (post_send (&resource_handles[remote_args->qp_num], IBV_WR_RDMA_WRITE))
     {
@@ -141,10 +141,10 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
             fprintf (stderr, "failed to destroy resources\n");
         }
     }
-    resource_handles[remote_args->qp_num].remote_props.rkey = rkey_temp;
-    resource_handles[remote_args->qp_num].remote_buf_len = temp_len;
-    printf("restored rkey: %x\n", resource_handles[remote_args->qp_num].remote_props.rkey);
-    sleep(2);
+//    resource_handles[remote_args->qp_num].remote_props.rkey = rkey_temp;
+//    resource_handles[remote_args->qp_num].remote_buf_len = temp_len;
+//    printf("restored rkey: %x\n", resource_handles[remote_args->qp_num].remote_props.rkey);
+//    sleep(2);
 
     printf("Returning...\n");
     // TODO: make sure to free memory before returning

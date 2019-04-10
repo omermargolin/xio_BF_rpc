@@ -46,7 +46,7 @@
 #define MAX_POLL_CQ_TIMEOUT 2000
 #define MSG "1234567890"
 #define RDMAMSGR "RDMA read operation "
-#define SHA_SIZE 64
+#define SHA_SIZE 20 * 9
 #define RDMAMSGW "RDMA write operation"
 #define MSG_SIZE (1024*1024 +1000)
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -1106,29 +1106,30 @@ usage (const char *argv0)
             " -g, --gid_idx <git index> gid index to be used in GRH (default not used)\n");
 }
 
-int destination_rg_mr (uint64_t *dest_addr, struct resources *res){
-        int mr_flags = 0;
-        printf("Start destination_rg_mr\n");
-        printf("dest_addr:%p\n",dest_addr);
+int destination_rg_mr (uint64_t *dest_addr, struct resources *res)
+{
+	int mr_flags = 0;
+	printf("Start destination_rg_mr\n");
+	printf("dest_addr:%p\n",dest_addr);
 
-        res->dest_buf = dest_addr;
+	res->dest_buf = dest_addr;
 
 
-        /* register the memory buffer */
-        mr_flags = IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ |
-                IBV_ACCESS_REMOTE_WRITE;
-        res->dest_mr = ibv_reg_mr (res->pd, dest_addr, SHA_SIZE, mr_flags);
-        if (!res->dest_mr)
-        {
-                fprintf (stderr, "ibv_reg_mr failed with mr_flags=0x%x\n", mr_flags);
-                free (dest_addr);
-                return 1;
-        }
-        fprintf (stdout,
-                        "DESTINATION MR was registered with addr=%p, lkey=0x%x, rkey=0x%x, flags=0x%x\n",
-                        dest_addr, res->dest_mr->lkey, res->dest_mr->rkey, mr_flags);
+	/* register the memory buffer */
+	mr_flags = IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ |
+			IBV_ACCESS_REMOTE_WRITE;
+	res->dest_mr = ibv_reg_mr (res->pd, dest_addr, SHA_SIZE, mr_flags);
+	if (!res->dest_mr)
+	{
+		fprintf (stderr, "ibv_reg_mr failed with mr_flags=0x%x\n", mr_flags);
+		free (dest_addr);
+		return 1;
+	}
+	fprintf (stdout,
+			"DESTINATION MR was registered with addr=%p, lkey=0x%x, rkey=0x%x, flags=0x%x\n",
+			dest_addr, res->dest_mr->lkey, res->dest_mr->rkey, mr_flags);
 	rpc_args.dest_key = res->dest_mr->rkey;
-        return 0;
+	return 0;
 }
 
 //alan1
@@ -1331,11 +1332,8 @@ main (int argc, char *argv[]) {
         printf("Error, Failed to alloc buffer!");
         exit(1);
     }
-    memset (dest_buffer,0,SHA_SIZE);
-//	if (argc != 2) {
-//		printf("Usage: client hostname\n");
-//		exit(1);
-//	}
+    memset (dest_buffer, 0, SHA_SIZE);
+
     while (1)
     {
         int c;
@@ -1495,36 +1493,24 @@ main (int argc, char *argv[]) {
 	}
 
 //	Call RPC stating the remote server qp number
-//	rpc_args.qp_num = res.remote_props.qp_num;
-//	rpc_args.qp_num = QP_id;
-//	printf("Remote queue pair ID=%d, original QP_id:%d\n", rpc_args.qp_num,QP_id);
 	printf("Remote queue pair ID=%d\n", rpc_args.qp_num);
 
 	printf("Getting ready to call hello world\n");
     rpc_args.src_add = res.buf;
-  //  rpc_args.dest_add = res.dest_buf;
-
-    // printf("dest_addr before rg mr :%p\n",&(rpc_args.dest_add));
-    // printf("dest_addr before rg mr :%p\n",(rpc_args.dest_add));
-    // printf("dest_addr len :%d\n",sizeof(rpc_args.dest_add));
     printf("src_addr:%p\n",rpc_args.src_add);
     printf("src_addr len :%d\n",sizeof(rpc_args.src_add));
 
-    // printf("len len :%d\n",sizeof(rpc_args.len));
-    // printf("qp_num len :%d\n",sizeof(rpc_args.qp_num));
+	if (destination_rg_mr(&dest_buffer, &res)==1)
+		printf("Error allocating result buffer!\n");
 
+	rpc_args.dest_add = res.dest_buf;
+	rpc_args.len = SHA_SIZE;
 
-        if (destination_rg_mr(&dest_buffer, &res)==1)
-                printf("Error allocating result buffer!\n");
-
-        rpc_args.dest_add = res.dest_buf;
-        rpc_args.len = 12*8;//YOSSI Hard coded....
-
-	//        printf("RPC args fields:\n qp_num=0x%x\t src_add:%p\n len=%d\t dest=%p\n", rpc_args.qp_num,rpc_args.src_add,rpc_args.len,rpc_args.dest_add);
 	int i;
+	// change for stop condition to measure performance
 	for (i =0; i< 1; i++) {
-	  p = hw_1(&rpc_args, cl);
-	  printf("call %d", i);
+		p = hw_1(&rpc_args, cl);
+		printf("call %d", i);
 	}
 	printf("Back from hello world\n");
 	if (p == NULL) {
