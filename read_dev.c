@@ -5,6 +5,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#define BLOCK_SIZE 512
+
+// Args: device_name, LBA offset in blocks of 512 bytes, number of blocks of 512 bytes to read, pointer to buffer where data expected.
 int read_blkdev(char* dev_name, int offset, int num_blocks, char* buffer)
 {
 //   if (argc < 4) {
@@ -16,10 +19,9 @@ int read_blkdev(char* dev_name, int offset, int num_blocks, char* buffer)
 //    char * dev_name = argv[1];  //{"pwrite.txt"};
 //    int offset = atoi(argv[2]);
 //    int num_blocks = atoi(argv[3]);
-//    char buffer[num_blocks * 512];
+//    char buffer[num_blocks * BLOCK_SIZE];
 
     //open file
-    // fd = open(dev_name, O_RDWR|O_CREAT, 0777);
     fd = open(dev_name, O_RDONLY, 0777);
     //error checking
     if(fd == -1) {
@@ -32,12 +34,12 @@ int read_blkdev(char* dev_name, int offset, int num_blocks, char* buffer)
 // //    if (fstat(fd, &st)) return 1;
 // //    printf("Media Block size = %s\n", st.st_blksize);
 
-    if (pread(fd, buffer, num_blocks * 512, offset) == -1) {
+    if (pread(fd, buffer, num_blocks * BLOCK_SIZE, offset * BLOCK_SIZE) == -1) {
         perror("[error in read]\n");
         return 1;
-    } else {
-        printf("[reading data] from %s\n", dev_name);
-        printf("[%s]\n", buffer);
     }
+
+    printf("[read data] from %s\n", dev_name);
+    printf("[%s]\n", buffer);
     return 0;
 }
