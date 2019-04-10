@@ -7,9 +7,9 @@ struct rpc_args_t
     uint32_t qp_num;      	      /* qid to use */
     uint32_t dest_key;
     char device_name[11];          /*device name to read from and write to */
-    uint32_t lba;
-    uint32_t num_lbas;
-    uint32_t dest_lba;
+    int lba;
+    int num_lbas;
+    int dest_lba;
     
 };
 
