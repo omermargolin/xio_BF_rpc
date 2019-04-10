@@ -65,16 +65,43 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
 	   return (&result_p);
 	}
 
+    struct vlb_d vlb[8] = {
+      {259, true},
+      {120, true},
+      {4096, false},
+      {120, true},
+      {4096, false},
+      {4096, false},
+      {120, true},
+      {120, true},
+    };
 
-    rc = decompress_data(buffer, remote_args->num_lbas * 512, de_buffer, 4096);
-    if (rc)
-    {
-       fprintf (stderr, "failed to decompress data\n");
-       strcpy(msg, "Finish Server");
- 	   result_p = msg;
- 	   printf("Returning...\n");
-       return (&result_p);
+    int start_position = 0;
+    char hashes[8][20];
+    int i;
+    for (i=0; i<8; i++) {
+
+      //      //decompress from current pointer to len
+      //      // increase current pointer by len
+      //      // comput hash of returned decompressed buffer
+      //      // add hash to hash result array
+      //TODO: Compute hash on each 512 byte block of 4k
+
+      if (vlb[i].compressed) {
+	rc = decompress_data(buffer + start_position, vlb[i].len, de_buffer, 4096);
+	if (rc)
+	  {
+	    fprintf (stderr, "failed to decompress data\n");
+	    strcpy(msg, "Finish Server");
+	    result_p = msg;
+	    printf("Returning...\n");
+	    return (&result_p);
+	  }
+      }
+      start_position += vlb[i].len;
+      Sha1(de_buffer, 4096, hashes[i]);
     }
+
     //printf("*address:%s\n", *remote_args->src_add);
     //     printf("len:%d\n", remote_args->len);
     //     printf("dest val:%s\n", remote_args->dest_add);

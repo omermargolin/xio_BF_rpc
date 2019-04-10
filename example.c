@@ -70,7 +70,7 @@ int test_large_deflate(compr, comprLen, uncompr, uncomprLen)
         fprintf(stderr, "deflate not greedy\n");
         exit(1);
     }
- 
+
     printf("After 1st deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out);
 
     if (0) {
@@ -81,7 +81,7 @@ int test_large_deflate(compr, comprLen, uncompr, uncomprLen)
     err = deflate(&c_stream, Z_NO_FLUSH);
     CHECK_ERR(err, "deflate");
 
-    printf("After 2nd deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out); 
+    printf("After 2nd deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out);
 
 
     /* Switch back to compressing mode: */
@@ -91,7 +91,7 @@ int test_large_deflate(compr, comprLen, uncompr, uncomprLen)
     err = deflate(&c_stream, Z_NO_FLUSH);
     CHECK_ERR(err, "deflate");
 
-    printf("After 3rd deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out); 
+    printf("After 3rd deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out);
 }
 
     err = deflate(&c_stream, Z_FINISH);
@@ -101,7 +101,7 @@ int test_large_deflate(compr, comprLen, uncompr, uncomprLen)
     }
 
 
-    printf("After 4rd deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out); 
+    printf("After 4rd deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out);
 
     err = deflateEnd(&c_stream);
     CHECK_ERR(err, "deflateEnd");
@@ -185,19 +185,19 @@ int decompress_data(char *buffer, int compress_len, char *de_buffer, int decompr
     //    printf("out of memory\n");
     //    exit(1);
     //}
-    
+
     //strcpy((char*)uncompr, "hello hello!");
     //printf("Before deflate (compress) uncompr=%s\n", (char*) uncompr);
 
     //int compr_size;
 
     //compr_size = test_large_deflate(compr, comprLen, uncompr, uncomprLen);
-    printf("After deflate (compress) compr_size=%d, uncompr=%s, compr=%s\n", compress_len, (char*) buffer);
+    //    printf("After deflate (compress) compr_size=%d, uncompr=%s, compr=%s\n", compress_len, (char*) buffer);
     test_large_inflate(buffer, compress_len, de_buffer, decompress_len);
-    printf("After inflate (decompress) uncompr=%s, compr=%s\n", (char*) de_buffer, (char*) buffer);
+    //    printf("After inflate (decompress) uncompr=%s, compr=%s\n", (char*) de_buffer, (char*) buffer);
 
 
-    free(buffer);
+    //free(buffer);
     //free(uncompr);
 
     return 0;

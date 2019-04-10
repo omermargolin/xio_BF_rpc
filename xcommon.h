@@ -11,9 +11,12 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdbool.h>
 #include <netdb.h>
 #include <rpc/rpc.h>
 #include <infiniband/verbs.h>
+
+#define HASH_LENGTH 20
 
 
 /* structure of system resources */
@@ -54,3 +57,17 @@ struct config_t
     int ib_port;                  /* local IB port to work with */
     int gid_idx;                  /* gid index to use */
 };
+
+
+struct vlb_d {   // VLB entry
+  u_int32_t len;
+  bool compressed;
+  //  char* filename;
+};
+
+//TODO:
+// struct request
+// offset into the drive
+// length of read in lbas
+// vlb length
+// vlb
