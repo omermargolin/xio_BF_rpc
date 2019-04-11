@@ -168,7 +168,6 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
     // TODO: make sure to free memory before returning
     free(buffer);
     free(de_buffer);
-    free(hashes);
     return (&result_p);
 }
 
