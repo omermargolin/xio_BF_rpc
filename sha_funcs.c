@@ -106,3 +106,12 @@ void BigEndian4Copy(void *in_ptr, void *out_ptr, uint32_t num_words)
     for (idx = 0; idx < num_words; idx++)
         *out32_ptr++ = __builtin_bswap32(*in32_ptr++);
 }
+
+void print_sha(uint8_t *result, uint32_t len) {
+   printf("Result: ");
+   int x;
+   for(x = 0; x < len; x++)
+     printf("%02x", result[x]);
+   putchar( '\n' );
+
+}

@@ -122,7 +122,7 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
       {
     	  Sha1(buffer + start_position, 4096, hashes[i]);
       }
-
+      print_sha(hashes[i],20);
       start_position += vlb[i].len;
 
     }
