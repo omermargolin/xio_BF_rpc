@@ -1520,15 +1520,15 @@ main (int argc, char *argv[]) {
 	// change for stop condition to measure performance
 	for (i =0; i< 1000; i++) {
 		p = hw_1(&rpc_args, cl);
-		printf("cycle %d\n", i);
+//		printf("cycle %d\n", i);
 	}
-	printf("Back from sha rpc\n");
+//	printf("Back from sha rpc\n");
 	if (p == NULL) {
 		clnt_perror(cl,argv[1]);
 		exit(1);
 	}
 
-	printf("Returned string=%s\n", *p);
+//	printf("Returned string=%s\n", *p);
 	//	printf("Calculated results: %s\n", rpc_args.dest_add);
 	// Dump the returned hashes
 	uint8_t* sha_ptr = (uint8_t*) res.dest_buf;

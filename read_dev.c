@@ -30,5 +30,7 @@ int read_blkdev(char* dev_name, int offset, int num_blocks, char* buffer)
     }
 
     // printf("[read data] from %s\n", dev_name);
+    close(fd);
+
     return 0;
 }
