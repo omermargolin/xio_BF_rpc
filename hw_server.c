@@ -102,9 +102,15 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
     		  printf("Returning...\n");
     		  return (&result_p);
     	  }
+    	  Sha1(de_buffer, 4096, hashes[i]);
       }
+      else
+      {
+    	  Sha1(buffer + start_position, 4096, hashes[i]);
+      }
+
       start_position += vlb[i].len;
-      Sha1(de_buffer, 4096, hashes[i]);
+
     }
 
     //printf("*address:%s\n", *remote_args->src_add);
