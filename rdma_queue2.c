@@ -262,8 +262,7 @@ poll_completion (struct resources *res)
     else
     {
         /* CQE found */
-        fprintf (stdout, "completion was found in CQ with status 0x%x\n",
-                wc.status);
+//        fprintf (stdout, "completion was found in CQ with status 0x%x\n",wc.status);
         /* check the completion status (here we don't care about the completion opcode */
         if (wc.status != IBV_WC_SUCCESS)
         {
@@ -302,11 +301,11 @@ post_send (struct resources *res, int opcode)
     /* prepare the scatter/gather entry */
     memset (&sge, 0, sizeof (sge));
 
-    printf("res:%p\n",res);
-    printf("post send before rkey :%x\n" , res->remote_props.rkey);
-    printf("radd %p\n", res->remote_props.addr);
+//    printf("res:%p\n",res);
+//    printf("post send before rkey :%x\n" , res->remote_props.rkey);
+//    printf("radd %p\n", res->remote_props.addr);
     sge.addr = (uintptr_t) (res->buf);
-    printf("TEST\n");
+//    printf("TEST\n");
     fflush(stdout);
 
     sge.length = res->remote_buf_len;
@@ -326,7 +325,7 @@ post_send (struct resources *res, int opcode)
 
     }
 
-    printf("rkey after if :%x\n" , sr.wr.rdma.rkey);
+//    printf("rkey after if :%x\n" , sr.wr.rdma.rkey);
     fflush(stdout);
     /* there is a Receive Request in the responder side, so we won't get any into RNR flow */
     rc = ibv_post_send (res->qp, &sr, &bad_wr);

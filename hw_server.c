@@ -96,7 +96,7 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
     	//   printf("Calling decompress with %d\n", vlb[i].len );
           //decompress from current pointer to len
     	  rc = decompress_data(buffer + start_position, vlb[i].len, de_buffer, 4096);
-    	  printf("returned from decompress...\n");
+//    	  printf("returned from decompress...\n");
     	  if (rc)
     	  {
     		  fprintf (stderr, "failed to decompress data\n");
@@ -116,7 +116,7 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
       {
     	  Sha1(buffer + start_position, 4096, hashes[i]);
       }
-      print_sha(hashes[i],20);
+//      print_sha(hashes[i],20);
       // increase current pointer by len
       start_position += vlb[i].len;
     }
