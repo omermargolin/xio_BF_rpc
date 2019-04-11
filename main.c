@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <rpc/rpc.h>
+#include "sha_funcs.h"
 #include "hw.h"
-
 /*
    Simple "hello world" program that demonstrates an rpc call.
 */
@@ -1307,6 +1307,14 @@ void *rdma_connect_to_server_thread(void *cl_t)
 	printf("Returned int=%d\n", QP_id);
 }
 
+//TOODO: Remove duplicate func (move to xcommon and use xcommon here?)
+void print_sha(uint8_t *result, uint32_t len) {
+   printf("Hash: ");
+   int x;
+   for(x = 0; x < len; x++)
+     printf("%02x", result[x]);
+   putchar( '\n' );
+}
 
 //This is the entry point for clients
 
@@ -1521,8 +1529,13 @@ main (int argc, char *argv[]) {
 	}
 
 	printf("Returned string=%s\n", *p);
-	printf("Calculated results: %s\n", rpc_args.dest_add);
-
+	//	printf("Calculated results: %s\n", rpc_args.dest_add);
+	// Dump the returned hashes
+	uint8_t* sha_ptr = (uint8_t*) res.dest_buf;
+	for (i=0; i<8; i++) {
+	  print_sha(sha_ptr, 20);
+	  sha_ptr += 20;
+	}
 	return 0;
 
 main_exit:
