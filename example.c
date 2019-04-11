@@ -71,28 +71,24 @@ int test_large_deflate(compr, comprLen, uncompr, uncomprLen)
         exit(1);
     }
 
-    printf("After 1st deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out);
-
+    // printf("After 1st deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out);
     if (0) {
-    /* Feed in already compressed data and switch to no compression: */
-    deflateParams(&c_stream, Z_NO_COMPRESSION, Z_DEFAULT_STRATEGY);
-    c_stream.next_in = compr;
-    c_stream.avail_in = (uInt)comprLen/2;
-    err = deflate(&c_stream, Z_NO_FLUSH);
-    CHECK_ERR(err, "deflate");
+        /* Feed in already compressed data and switch to no compression: */
+        deflateParams(&c_stream, Z_NO_COMPRESSION, Z_DEFAULT_STRATEGY);
+        c_stream.next_in = compr;
+        c_stream.avail_in = (uInt)comprLen/2;
+        err = deflate(&c_stream, Z_NO_FLUSH);
+        CHECK_ERR(err, "deflate");
+        // printf("After 2nd deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out);
 
-    printf("After 2nd deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out);
-
-
-    /* Switch back to compressing mode: */
-    deflateParams(&c_stream, Z_BEST_COMPRESSION, Z_FILTERED);
-    c_stream.next_in = uncompr;
-    c_stream.avail_in = (uInt)uncomprLen;
-    err = deflate(&c_stream, Z_NO_FLUSH);
-    CHECK_ERR(err, "deflate");
-
-    printf("After 3rd deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out);
-}
+        /* Switch back to compressing mode: */
+        deflateParams(&c_stream, Z_BEST_COMPRESSION, Z_FILTERED);
+        c_stream.next_in = uncompr;
+        c_stream.avail_in = (uInt)uncomprLen;
+        err = deflate(&c_stream, Z_NO_FLUSH);
+        CHECK_ERR(err, "deflate");
+        // printf("After 3rd deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out);
+    }
 
     err = deflate(&c_stream, Z_FINISH);
     if (err != Z_STREAM_END) {
@@ -100,9 +96,7 @@ int test_large_deflate(compr, comprLen, uncompr, uncomprLen)
         exit(1);
     }
 
-
-    printf("After 4rd deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out);
-
+    // printf("After 4rd deflate, c_stream.next_out=%lx, c_stream.avail_out=%d\n", c_stream.next_out, c_stream.avail_out);
     err = deflateEnd(&c_stream);
     CHECK_ERR(err, "deflateEnd");
     return comprLen - c_stream.avail_out;
@@ -138,82 +132,22 @@ void test_large_inflate(compr, comprLen, uncompr, uncomprLen)
 
     for (;;) {
 //        printf("inside test_large_inflate, err=%d, next_in=%lx avail_in=%lu, next_out=%lu, avail_out=%lu uncompress content: %s\n", err, d_stream.next_in, d_stream.avail_in, d_stream.next_out, d_stream.avail_out, (char*)(uncompr));
-
-
         err = inflate(&d_stream, Z_NO_FLUSH);
         if (err == Z_STREAM_END) break;
         CHECK_ERR(err, "large inflate");
     }
 //    printf("inside test_large_inflate - after for loop, err=%d, next_in=%lx avail_in=%lu, next_out=%lu, avail_out=%lu uncompress content: %s\n", err, d_stream.next_in, d_stream.avail_in, d_stream.next_out, d_stream.avail_out, (char*)(uncompr));
-
 //    printf("uncompress content the end: %s\n", (char*)uncompr);
     err = inflateEnd(&d_stream);
     CHECK_ERR(err, "inflateEnd");
-
-//    if (d_stream.total_out != 2*uncomprLen + comprLen/2) {
-//        fprintf(stderr, "bad large inflate: %ld\n", d_stream.total_out);
-//        exit(1);
-//    } else {
-//        printf("large_inflate(): OK\n");
-//    }
 }
 
 int decompress_data(char *buffer, int compress_len, char *de_buffer, int decompress_len)
 {
-    //Byte *compr, *uncompr;
-    //uLong comprLen = 10000*sizeof(int); /* don't overflow on MSDOS */
-    //uLong uncomprLen = comprLen;
-    //static const char* myVersion = ZLIB_VERSION;
-
-    //if (zlibVersion()[0] != myVersion[0]) {
-    //    fprintf(stderr, "incompatible zlib version\n");
-    //    exit(1);
-
-    //} else if (strcmp(zlibVersion(), ZLIB_VERSION) != 0) {
-    //    fprintf(stderr, "warning: different zlib version\n");
-    //}
-
-    //printf("zlib version %s = 0x%04x, compile flags = 0x%lx\n",
-    //        ZLIB_VERSION, ZLIB_VERNUM, zlibCompileFlags());
-
-    //compr    = (Byte*)calloc((uInt)comprLen, 1);
-    //uncompr  = (Byte*)calloc((uInt)uncomprLen, 1);
-    /* compr and uncompr are cleared to avoid reading uninitialized
-     * data and to ensure that uncompr compresses well.
-     */
-    //if (compr == Z_NULL || uncompr == Z_NULL) {
-    //    printf("out of memory\n");
-    //    exit(1);
-    //}
-
-    //strcpy((char*)uncompr, "hello hello!");
-    //printf("Before deflate (compress) uncompr=%s\n", (char*) uncompr);
-
-    //int compr_size;
-
-    //compr_size = test_large_deflate(compr, comprLen, uncompr, uncomprLen);
-    //    printf("After deflate (compress) compr_size=%d, uncompr=%s, compr=%s\n", compress_len, (char*) buffer);
-
-
-	//printf("compressed buffer content is: %s\n", (char *)buffer);
-//	printf("compressed buffer len is: %d", compress_len);
-//	compress_len=164;
-//	buf = (char *) malloc (164);
-//	de_buf = (char *) malloc (4096);
-//	printf("compressed buffer len is: %d\n", compress_len);
-//	printf("decompressed buffer len is: %d\n", decompress_len);
-//	printf("calling test_large_inflate\n");
-
-//	read_blkdev("/dev/loop0", 0, 164, buf);
 	fflush(stdout);
-//	test_large_inflate(buf, compress_len, de_buf, decompress_len);
 	test_large_inflate(buffer, compress_len, de_buffer, decompress_len);
 //	printf("After inflate (decompress) uncompr=%s, compr=%s\n", (char*) de_buffer, (char*) buffer);
 //	printf("After inflate (decompress) uncompr=%s, compr=%s\n", (char*) de_buf, (char*) buf);
 	fflush(stdout);
-
-    //free(buffer);
-    //free(uncompr);
-
     return 0;
 }

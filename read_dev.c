@@ -10,17 +10,7 @@
 // Args: device_name, LBA offset in blocks of 512 bytes, number of blocks of 512 bytes to read, pointer to buffer where data expected.
 int read_blkdev(char* dev_name, int offset, int num_blocks, char* buffer)
 {
-//   if (argc < 4) {
-//        fprintf(stderr, "Usage: %s <device> <LBA_offset> <num_of_blocks>\n", argv[0]);
-//        return 1;
-//    }
-
     int fd;
-//    char * dev_name = argv[1];  //{"pwrite.txt"};
-//    int offset = atoi(argv[2]);
-//    int num_blocks = atoi(argv[3]);
-//    char buffer[num_blocks * BLOCK_SIZE];
-
     //open file
     fd = open(dev_name, O_RDONLY, 0777);
     //error checking
@@ -39,7 +29,6 @@ int read_blkdev(char* dev_name, int offset, int num_blocks, char* buffer)
         return 1;
     }
 
-    printf("[read data] from %s\n", dev_name);
-//    printf("[%s]\n", buffer);
+    // printf("[read data] from %s\n", dev_name);
     return 0;
 }
