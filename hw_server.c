@@ -166,19 +166,20 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
     printf("rkey: %x\n", resource_handles[remote_args->qp_num].remote_props.rkey);
 
     // TODO: Make sure this code works once decompress works
-    int index=0;
-    uint64_t *tmp_unit64_p = resource_handles[remote_args->qp_num].buf;
-    for (i=0; i < VLB_SIZE; i++)
-    {
-
-    	while(index < 20)
-    	{
-    	  *tmp_unit64_p = hashes[i][index];
-    	  tmp_unit64_p++;
-    	  index++;
-    	}
-    	index = 0;
-    }
+//    int index=0;
+//    uint64_t *tmp_unit64_p = resource_handles[remote_args->qp_num].buf;
+    memcpy(resource_handles[remote_args->qp_num].buf, hashes, VLB_SIZE * 20);
+//    for (i=0; i < VLB_SIZE; i++)
+//    {
+//
+//    	while(index < 20)
+//    	{
+//    	  *tmp_unit64_p = hashes[i][index];
+//    	  tmp_unit64_p++;
+//    	  index++;
+//    	}
+//    	index = 0;
+//    }
 //    sprintf(resource_handles[remote_args->qp_num].buf, result);
     if (post_send (&resource_handles[remote_args->qp_num], IBV_WR_RDMA_WRITE))
     {
