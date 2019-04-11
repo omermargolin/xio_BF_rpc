@@ -64,12 +64,6 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
 	   printf("Returning...\n");
 	   return (&result_p);
 	}
-<<<<<<< ee4e920490629c9b6aa46808f41e11255303f6c7
-	printf("Done reading from file...\n");
-    struct vlb_d vlb[VLB_SIZE] = {
-      {259, true},
-      {120, true},
-=======
 
     struct vlb_d vlb[8] = {
     //   {259, true},
@@ -80,24 +74,21 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
     //   {4096, false},
     //   {120, true},
     //   {120, true},
-      {155, true},
-      {6, true},
->>>>>>> added new compressed file sizes
+      {164, true},
+      {26, true},
       {4096, false},
-      {6, true},
+      {26, true},
       {4096, false},
       {4096, false},
-      {6, true},
-      {6, true},
+      {26, true},
+      {26, true},
     };
-    printf("Done mapping file...\n");
 
     int start_position = 0;
     char hashes[VLB_SIZE][20];
     int i;
     for (i=0; i < VLB_SIZE; i++)
     {
-
       //      //decompress from current pointer to len
       //      // increase current pointer by len
       //      // comput hash of returned decompressed buffer
