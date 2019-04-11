@@ -42,11 +42,12 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <pthread.h>
-#include "xcommon.h"
+//#include "xcommon.h"
 /* poll CQ timeout in millisec (2 seconds) */
 #define MAX_POLL_CQ_TIMEOUT 2000
 #define MSG "1234567890"
 #define RDMAMSGR "RDMA read operation "
+#define VLB_SIZE 8
 #define SHA_SIZE 20 * VLB_SIZE
 #define RDMAMSGW "RDMA write operation"
 #define MSG_SIZE (1024*1024 +1000)
