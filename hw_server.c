@@ -195,7 +195,7 @@ char **aquirep_1_svc(void *remote_args, struct svc_req *req) {
     // printf("Entering: acquirep_svc\n");
     last_resource_handle++;  // TODO: Add check that we aren't blowing past the end of the array
     resource_handles[last_resource_handle].tcp_port = INITIAL_PORT + last_resource_handle;
-    // sprintf(msg, "%d, %d", last_resource_handle, resource_handles[last_resource_handle].tcp_port);
+    sprintf(msg, "%d, %d", last_resource_handle, resource_handles[last_resource_handle].tcp_port);
     result_p = msg;
     // printf("acquirep returning %s\n", msg);
     return(&result_p);
