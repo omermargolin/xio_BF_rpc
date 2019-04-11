@@ -1518,7 +1518,7 @@ main (int argc, char *argv[]) {
 
 	int i;
 	// change for stop condition to measure performance
-	for (i =0; i< 10; i++) {
+	for (i =0; i< 1000; i++) {
 		p = hw_1(&rpc_args, cl);
 		printf("cycle %d\n", i);
 	}
