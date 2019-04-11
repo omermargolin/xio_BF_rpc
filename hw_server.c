@@ -1,5 +1,6 @@
 #include "hw.h"
 #include "xcommon.h"
+#include <pthread.h>
 
 #define MAX_RESOURCE_HANDLES 20
 #define INITIAL_PORT 19875
@@ -13,9 +14,49 @@ struct config_t in_config = {
     0                             /* gid_idx */
 };
 
+struct proc_buffer_params {
+  uint8_t* buffer;
+  struct vlb_d *vlb;
+  uint8_t* hash;
+};
+
 int test_param=5;
 struct resources resource_handles[MAX_RESOURCE_HANDLES];
 int last_resource_handle = -1;
+
+void  *process_buffer(void *x_void_ptr) {
+      //TODO: Compute hash on each 512 byte block of 4k
+
+  struct proc_buffer_params *params = (struct proc_buffer_params*) x_void_ptr;
+  char* de_buffer = (char *) malloc (4096);
+  if (!de_buffer)  {
+    fprintf (stderr, "failed to malloc 4096 bytes to memory buffer\n");
+    return;
+  }
+  int rc;
+  struct vlb_d* vlb;
+  vlb = (*params).vlb;
+  if ((*vlb).compressed) {
+    //   printf("Calling decompress with %d\n", vlb[i].len );
+    //decompress from current pointer to len
+
+    rc = decompress_data((*params).buffer, (*vlb).len, de_buffer, 4096);
+    if (rc) {
+      fprintf (stderr, "failed to decompress data\n");
+      free(de_buffer);
+      return;
+    }
+    // compute hash of returned decompressed buffer
+    // add hash to hash result array
+    Sha1(de_buffer, 4096, (*params).hash);
+  } else  {
+	Sha1((*params).buffer, 4096, (*params).hash);
+  }
+  print_sha((*params).hash,20);
+  // increase current pointer by len
+  free(de_buffer);
+  return;
+}
 
 char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
     static char msg[256];
@@ -55,16 +96,6 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
        return (&result_p);
     }
 
-    de_buffer = (char *) malloc (4096);
-	if (!de_buffer)
-	{
-	   fprintf (stderr, "failed to malloc 4096 bytes to memory buffer\n");
-	   strcpy(msg, "Finish Server");
-	   result_p = msg;
-	   printf("Returning...\n");
-       free(buffer);
-	   return (&result_p);
-	}
 
     struct vlb_d vlb[8] = {
       {164, true},
@@ -87,38 +118,28 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
     */
     int start_position = 0;
     char hashes[VLB_SIZE][20];
+    pthread_t thread[VLB_SIZE];
+    struct proc_buffer_params thread_params[VLB_SIZE];
     int i;
     for (i=0; i < VLB_SIZE; i++)
     {
-      //TODO: Compute hash on each 512 byte block of 4k
-      if (vlb[i].compressed)
-      {
-    	//   printf("Calling decompress with %d\n", vlb[i].len );
-          //decompress from current pointer to len
-    	  rc = decompress_data(buffer + start_position, vlb[i].len, de_buffer, 4096);
-//    	  printf("returned from decompress...\n");
-    	  if (rc)
-    	  {
-    		  fprintf (stderr, "failed to decompress data\n");
-    		  strcpy(msg, "Finish Server");
-    		  result_p = msg;
-    		  printf("Returning...\n");
-              free(buffer);
-              free(de_buffer);
-              free(hashes);
-    		  return (&result_p);
-    	  }
-          // compute hash of returned decompressed buffer
-          // add hash to hash result array
-    	  Sha1(de_buffer, 4096, hashes[i]);
+      thread_params[i].buffer = (buffer + start_position);
+      thread_params[i].vlb = &vlb[i];
+
+      thread_params[i].hash = hashes[i];
+      //      process_buffer((void *) &thread_params[i]);
+      if (pthread_create(&thread[i], NULL, process_buffer, &thread_params[i])) {
+	fprintf(stderr, "Error creating thread\n");
+	return;
       }
-      else
-      {
-    	  Sha1(buffer + start_position, 4096, hashes[i]);
-      }
-//      print_sha(hashes[i],20);
-      // increase current pointer by len
       start_position += vlb[i].len;
+    }
+    /* wait for the second threads to finish */
+    for (i=0; i < VLB_SIZE; i++) {
+      if(pthread_join(thread[i], NULL)) {
+	fprintf(stderr, "Error joining thread\n");
+	return;
+      }
     }
 
     // printf("> > > > > Start post_send");
@@ -136,7 +157,6 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
         printf("Returning...\n");
         free(buffer);
         free(de_buffer);
-        free(hashes);
         return (&result_p);
     }
 
