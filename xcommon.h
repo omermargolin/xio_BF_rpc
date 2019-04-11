@@ -17,6 +17,8 @@
 #include <infiniband/verbs.h>
 
 #define HASH_LENGTH 20
+#define VLB_SIZE 8
+
 
 
 /* structure of system resources */

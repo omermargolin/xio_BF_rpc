@@ -193,8 +193,10 @@ int decompress_data(char *buffer, int compress_len, char *de_buffer, int decompr
 
     //compr_size = test_large_deflate(compr, comprLen, uncompr, uncomprLen);
     //    printf("After deflate (compress) compr_size=%d, uncompr=%s, compr=%s\n", compress_len, (char*) buffer);
-    test_large_inflate(buffer, compress_len, de_buffer, decompress_len);
-    //    printf("After inflate (decompress) uncompr=%s, compr=%s\n", (char*) de_buffer, (char*) buffer);
+
+	printf("calling test_large_inflate\n");
+	test_large_inflate(buffer, compress_len, de_buffer, decompress_len);
+    printf("After inflate (decompress) uncompr=%s, compr=%s\n", (char*) de_buffer, (char*) buffer);
 
 
     //free(buffer);

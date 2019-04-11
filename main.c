@@ -42,11 +42,12 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <pthread.h>
+#include "xcommon.h"
 /* poll CQ timeout in millisec (2 seconds) */
 #define MAX_POLL_CQ_TIMEOUT 2000
 #define MSG "1234567890"
 #define RDMAMSGR "RDMA read operation "
-#define SHA_SIZE 20 * 9
+#define SHA_SIZE 20 * VLB_SIZE
 #define RDMAMSGW "RDMA write operation"
 #define MSG_SIZE (1024*1024 +1000)
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -153,7 +154,7 @@ rpc_args_t rpc_args = {
 			   "/dev/loop0",                /*device name to read from and write to */
 			   0,							/*lba*/
 			   32,							/*num lbas*/
-			   5							/*dest lba*/
+			   33							/*dest lba*/
 };
 
 static void
