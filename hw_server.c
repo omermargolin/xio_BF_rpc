@@ -84,6 +84,14 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
       {26, true},
     };
 
+    /*  Sha1 expectations:
+    [root@indus inflate_alone]# sha1sum zero.txt
+    1ceaf73df40e531df3bfb26b4fb7cd95fb7bff1d  zero.txt
+    [root@indus inflate_alone]# sha1sum rand.txt
+    2378cea99e6e366efbea2ef805735b86bfeca6ca  rand.txt
+    [root@indus inflate_alone]# sha1sum private_data.txt
+    51698b37afbec6fcc48d317ac8523c27736da6b5  private_data.txt
+    */
     int start_position = 0;
     char hashes[VLB_SIZE][20];
     int i;
