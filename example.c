@@ -137,25 +137,25 @@ void test_large_inflate(compr, comprLen, uncompr, uncomprLen)
 
 
     for (;;) {
-        printf("inside test_large_inflate, err=%d, next_in=%lx avail_in=%lu, next_out=%lu, avail_out=%lu uncompress content: %s\n", err, d_stream.next_in, d_stream.avail_in, d_stream.next_out, d_stream.avail_out, (char*)(uncompr));
+//        printf("inside test_large_inflate, err=%d, next_in=%lx avail_in=%lu, next_out=%lu, avail_out=%lu uncompress content: %s\n", err, d_stream.next_in, d_stream.avail_in, d_stream.next_out, d_stream.avail_out, (char*)(uncompr));
 
 
         err = inflate(&d_stream, Z_NO_FLUSH);
         if (err == Z_STREAM_END) break;
         CHECK_ERR(err, "large inflate");
     }
-    printf("inside test_large_inflate - after for loop, err=%d, next_in=%lx avail_in=%lu, next_out=%lu, avail_out=%lu uncompress content: %s\n", err, d_stream.next_in, d_stream.avail_in, d_stream.next_out, d_stream.avail_out, (char*)(uncompr));
+//    printf("inside test_large_inflate - after for loop, err=%d, next_in=%lx avail_in=%lu, next_out=%lu, avail_out=%lu uncompress content: %s\n", err, d_stream.next_in, d_stream.avail_in, d_stream.next_out, d_stream.avail_out, (char*)(uncompr));
 
-    printf("uncompress content the end: %s\n", (char*)uncompr);
+//    printf("uncompress content the end: %s\n", (char*)uncompr);
     err = inflateEnd(&d_stream);
     CHECK_ERR(err, "inflateEnd");
 
-    if (d_stream.total_out != 2*uncomprLen + comprLen/2) {
-        fprintf(stderr, "bad large inflate: %ld\n", d_stream.total_out);
-        exit(1);
-    } else {
-        printf("large_inflate(): OK\n");
-    }
+//    if (d_stream.total_out != 2*uncomprLen + comprLen/2) {
+//        fprintf(stderr, "bad large inflate: %ld\n", d_stream.total_out);
+//        exit(1);
+//    } else {
+//        printf("large_inflate(): OK\n");
+//    }
 }
 
 int decompress_data(char *buffer, int compress_len, char *de_buffer, int decompress_len)
@@ -194,10 +194,23 @@ int decompress_data(char *buffer, int compress_len, char *de_buffer, int decompr
     //compr_size = test_large_deflate(compr, comprLen, uncompr, uncomprLen);
     //    printf("After deflate (compress) compr_size=%d, uncompr=%s, compr=%s\n", compress_len, (char*) buffer);
 
-	printf("calling test_large_inflate\n");
-	test_large_inflate(buffer, compress_len, de_buffer, decompress_len);
-    printf("After inflate (decompress) uncompr=%s, compr=%s\n", (char*) de_buffer, (char*) buffer);
 
+	//printf("compressed buffer content is: %s\n", (char *)buffer);
+//	printf("compressed buffer len is: %d", compress_len);
+//	compress_len=164;
+//	buf = (char *) malloc (164);
+//	de_buf = (char *) malloc (4096);
+//	printf("compressed buffer len is: %d\n", compress_len);
+//	printf("decompressed buffer len is: %d\n", decompress_len);
+//	printf("calling test_large_inflate\n");
+
+//	read_blkdev("/dev/loop0", 0, 164, buf);
+	fflush(stdout);
+//	test_large_inflate(buf, compress_len, de_buf, decompress_len);
+	test_large_inflate(buffer, compress_len, de_buffer, decompress_len);
+//	printf("After inflate (decompress) uncompr=%s, compr=%s\n", (char*) de_buffer, (char*) buffer);
+//	printf("After inflate (decompress) uncompr=%s, compr=%s\n", (char*) de_buf, (char*) buf);
+	fflush(stdout);
 
     //free(buffer);
     //free(uncompr);

@@ -62,7 +62,7 @@ struct config_t
 
 
 struct vlb_d {   // VLB entry
-  u_int32_t len;
+  int len;
   bool compressed;
   //  char* filename;
 };

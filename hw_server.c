@@ -20,7 +20,7 @@ int last_resource_handle = -1;
 char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
     static char msg[256];
     static char *result_p;
-    static char *buffer, de_buffer;
+    static char *buffer, *de_buffer;
     // rpc_args_t* remote_args = (rpc_args_t*)a;
     int rc;
     printf ("Entering hw_1_svc\n");
