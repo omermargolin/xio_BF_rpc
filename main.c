@@ -1518,11 +1518,11 @@ main (int argc, char *argv[]) {
 
 	int i;
 	// change for stop condition to measure performance
-	for (i =0; i< 1; i++) {
+	for (i =0; i< 10; i++) {
 		p = hw_1(&rpc_args, cl);
-		printf("call %d", i);
+		printf("cycle %d\n", i);
 	}
-	printf("Back from hello world\n");
+	printf("Back from sha rpc\n");
 	if (p == NULL) {
 		clnt_perror(cl,argv[1]);
 		exit(1);

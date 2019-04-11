@@ -209,6 +209,8 @@ char **hw_1_svc(rpc_args_t *remote_args, struct svc_req *req) {
             fprintf (stderr, "failed to destroy resources\n");
         }
     }
+    rc = poll_completion(&resource_handles[remote_args->qp_num]);
+
 //    resource_handles[remote_args->qp_num].remote_props.rkey = rkey_temp;
 //    resource_handles[remote_args->qp_num].remote_buf_len = temp_len;
 //    printf("restored rkey: %x\n", resource_handles[remote_args->qp_num].remote_props.rkey);
