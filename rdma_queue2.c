@@ -342,7 +342,7 @@ post_send (struct resources *res, int opcode)
                 fprintf (stdout, "RDMA Read Request was posted\n");
                 break;
             case IBV_WR_RDMA_WRITE:
-                fprintf (stdout, "RDMA Write Request was posted\n");
+//                fprintf (stdout, "RDMA Write Request was posted\n");
                 break;
             default:
                 fprintf (stdout, "Unknown Request was posted\n");
